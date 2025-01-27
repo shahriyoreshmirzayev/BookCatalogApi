@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BookApplication.DTO;
+using BookApplication.DTOs.BookDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
