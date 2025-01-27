@@ -26,62 +26,74 @@ public class BookController : ControllerBase
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllBooks()
     {
-        return Ok(await _bookRepository.GetAsync(x => true));
+        var books = (await _bookRepository.GetAsync(x => true));
+        if (books == null)
+        {
+            return Ok();
+        }
+        IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
+        return Ok(booksRes);
     }
 
     [HttpGet("[action]/{id}")]
     public async Task<IActionResult> GetBookById(int id)
     {
-        return Ok(await _bookRepository.GetByIdAsync(id));
+        Book book = await _bookRepository.GetByIdAsync(id);
+        if (book == null) NotFound($"Book Id: {id} not found ....!");
+        return Ok(_mapper.Map<BookGetDTO>(book));
     }
 
     [HttpPost("action")]
     public async Task<IActionResult> CreateBook([FromBody] BookCreateDTO bookCreate)
     {
         if (ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        Book book = _mapper.Map<Book>(bookCreate);
+        var validationRes = _validator.Validate(book);
+        if (!validationRes.IsValid)
+            return BadRequest(validationRes);
+        for (int i = 0; i < book.Authors.Count; i++)
         {
-            Book book = _mapper.Map<Book>(bookCreate);
-            var validationRes = _validator.Validate(book);
-            if (!validationRes.IsValid) return BadRequest(validationRes);
-            for (int i = 0; i < book.Authors.Count; i++)
+            Author author = book.Authors.ToArray()[i];
+            author = await _authorRepository.GetByIdAsync(author.Id);
+            if (author == null)
             {
-                Author author = book.Authors.ToArray()[i];
-                author = await _authorRepository.GetByIdAsync(author.Id);
-                if (author == null)
-                {
-                    return NotFound("Author Id: " + author.Id + " not found . . . . !");
-                }
+                return NotFound("Author Id: " + author.Id + " not found . . . . !");
             }
-            book = await _bookRepository.AddAsync(book);
-            return Ok(book);
         }
-        return BadRequest(ModelState);
+        book = await _bookRepository.AddAsync(book);
+        if (book == null) NotFound("Book not found . ....!");
+        return Ok(_mapper.Map<BookGetDTO>(book));
+
     }
 
     [HttpPut("action")]
     public async Task<IActionResult> UpdateBook([FromBody] BookUpdateDTO bookCreate)
     {
         if (ModelState.IsValid)
+            return BadRequest(ModelState);
+
+
+        Book book = _mapper.Map<Book>(bookCreate);
+        var validationRes = _validator.Validate(book);
+        if (!validationRes.IsValid)
         {
-            Book book = _mapper.Map<Book>(bookCreate);
-            var validationRes = _validator.Validate(book);
-            if (!validationRes.IsValid)
-            {
-                return BadRequest(validationRes);
-            }
-            for (int i = 0; i < book.Authors.Count; i++)
-            {
-                Author author = book.Authors.ToArray()[i];
-                author = await _authorRepository.GetByIdAsync(author.Id);
-                if (author == null)
-                {
-                    return NotFound($"Author Id: {author.Id} not found ...... !");
-                }
-            }
-            book = await _bookRepository.UpdateAsync(book);
-            return Ok(book);
+            return BadRequest(validationRes);
         }
-        return BadRequest(ModelState);
+        for (int i = 0; i < book.Authors.Count; i++)
+        {
+            Author author = book.Authors.ToArray()[i];
+            author = await _authorRepository.GetByIdAsync(author.Id);
+            if (author == null)
+            {
+                return NotFound($"Author Id: {author.Id} not found ...... !");
+            }
+        }
+        book = await _bookRepository.UpdateAsync(book);
+        if (book == null) NotFound("Book not found . ....!");
+        return Ok(_mapper.Map<BookGetDTO>(book));
+
     }
     [HttpDelete("action")]
     public async Task<IActionResult> DeleteBook([FromQuery] int bookId)

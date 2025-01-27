@@ -32,7 +32,8 @@ namespace BookCatalogApi.Controllers
             {
                 return NotFound($"Author Id {id} not found. .....!");
             }
-            return Ok(author);
+            AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
+            return Ok(authorGet);
         }
 
         [HttpGet("[action]")]
@@ -62,7 +63,9 @@ namespace BookCatalogApi.Controllers
                     }
                 }
                 author = await _authorRepository.AddAsync(author);
-                return author == null ? BadRequest() : Ok(author);
+                if (author == null) return NotFound();
+                AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
+                return Ok(authorGet);
 
 
             }
@@ -90,7 +93,9 @@ namespace BookCatalogApi.Controllers
                 }
             }
             author = await _authorRepository.AddAsync(author);
-            return author == null ? BadRequest() : Ok(author);
+            if (author == null) return NotFound();
+            AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
+            return Ok(authorGet);
 
         }
 
