@@ -43,7 +43,7 @@ public class BookController : ControllerBase
         return Ok(_mapper.Map<BookGetDTO>(book));
     }
 
-    [HttpPost("action")]
+    [HttpPost("[action]")]
     public async Task<IActionResult> CreateBook([FromBody] BookCreateDTO bookCreate)
     {
         if (ModelState.IsValid)
@@ -68,7 +68,7 @@ public class BookController : ControllerBase
 
     }
 
-    [HttpPut("action")]
+    [HttpPut("[action]")]
     public async Task<IActionResult> UpdateBook([FromBody] BookUpdateDTO bookCreate)
     {
         if (ModelState.IsValid)
@@ -95,7 +95,7 @@ public class BookController : ControllerBase
         return Ok(_mapper.Map<BookGetDTO>(book));
 
     }
-    [HttpDelete("action")]
+    [HttpDelete("[action]")]
     public async Task<IActionResult> DeleteBook([FromQuery] int bookId)
     {
         if (_bookRepository.DeleteAsync(bookId) != null)
