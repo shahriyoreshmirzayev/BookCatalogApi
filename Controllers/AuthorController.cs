@@ -3,8 +3,6 @@ using BookApplication.DTOs.AuthorDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookCatalogApi.Controllers
@@ -45,33 +43,58 @@ namespace BookCatalogApi.Controllers
             return Ok(resAuthors);
         }
 
-        [HttpGet("[action]")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> CreateAuthor([FromQuery] AuthorCreateDTO createDTO)
         {
             if (ModelState.IsValid)
             {
                 Author author = _mapper.Map<Author>(createDTO);
                 var validResult = _validator.Validate(author);
-                if (validResult.IsValid)
+                if (!validResult.IsValid) return BadRequest(validResult);
+
+                for (int i = 0; i < author.Books.Count; i++)
                 {
-                    for (int i = 0; i < author.Books.Count; i++)
+                    Book book = author.Books.ToArray()[i];
+                    book = await _bookRepository.GetByIdAsync(book.Id);
+                    if (book == null)
                     {
-                        Book book = author.Books.ToArray()[i];
-                        book = await _bookRepository.GetByIdAsync(book.Id);
-                        if (book == null)
-                        {
-                            return NotFound("Book Id not found. . ...");
-                        }
+                        return NotFound("Book Id not found. . ...");
                     }
-                    author = await _authorRepository.AddAsync(author);
-                    return author == null ? BadRequest() : Ok(author);
                 }
-                return BadRequest(validResult);
+                author = await _authorRepository.AddAsync(author);
+                return author == null ? BadRequest() : Ok(author);
+
+
             }
             return BadRequest(ModelState);
         }
 
-        [HttpGet("[action]")]
+        [HttpPut("[action]")]
+        public async Task<IActionResult> UpdateAuthor([FromQuery] AuthorCreateDTO createDTO)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            Author author = _mapper.Map<Author>(createDTO);
+            var validationRes = _validator.Validate(author);
+            if (validationRes.IsValid)
+            {
+                return BadRequest(validationRes);
+            }
+            for (int i = 0; i < author.Books.Count; i++)
+            {
+                Book book = author.Books.ToArray()[i];
+                book = await _bookRepository.GetByIdAsync(book.Id);
+                if (book == null)
+                {
+                    return NotFound("Book Id not found. . ...");
+                }
+            }
+            author = await _authorRepository.AddAsync(author);
+            return author == null ? BadRequest() : Ok(author);
+
+        }
+
+        [HttpDelete("[action]")]
         public async Task<IActionResult> DeleteAuthor([FromQuery] int id)
         {
             bool isDelete = await _authorRepository.DeleteAsync(id);
