@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BookApplication.DTOs.AuthorDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
@@ -44,6 +45,31 @@ namespace BookCatalogApi.Controllers
             return Ok(resAuthors);
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> CreateAuthor([FromQuery] AuthorCreateDTO createDTO)
+        {
+            if (ModelState.IsValid)
+            {
+                Author author = _mapper.Map<Author>(createDTO);
+                var validResult = _validator.Validate(author);
+                if (validResult.IsValid)
+                {
+                    for (int i = 0; i < author.Books.Count; i++)
+                    {
+                        Book book = author.Books.ToArray()[i];
+                        book = await _bookRepository.GetByIdAsync(book.Id);
+                        if (book == null)
+                        {
+                            return NotFound("Book Id not found. . ...");
+                        }
+                    }
+                    author = await _authorRepository.AddAsync(author);
+                    return author == null ? BadRequest() : Ok(author);
+                }
+                return BadRequest(validResult);
+            }
+            return BadRequest(ModelState);
+        }
 
         [HttpGet("[action]")]
         public async Task<IActionResult> DeleteAuthor([FromQuery] int id)
