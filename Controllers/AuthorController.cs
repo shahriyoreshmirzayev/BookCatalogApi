@@ -47,7 +47,7 @@ public class AuthorController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateDTO createDTO)
     {
-        if (!ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             Author author = _mapper.Map<Author>(createDTO);
             var validResult = _validator.Validate(author);

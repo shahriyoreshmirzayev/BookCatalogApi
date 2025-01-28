@@ -13,7 +13,7 @@ namespace BookCatalogApi
 
             builder.Services.AddInfrastructureServices(builder.Configuration);
             builder.Services.AddApplicationServices();
-
+            builder.Services.AddResponseCaching();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -31,6 +31,7 @@ namespace BookCatalogApi
 
             app.UseAuthorization();
 
+            app.UseResponseCaching();
 
             app.MapControllers();
 

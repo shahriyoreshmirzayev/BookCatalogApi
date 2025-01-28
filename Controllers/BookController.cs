@@ -24,6 +24,7 @@ public class BookController : ControllerBase
     }
 
     [HttpGet("[action]")]
+    [ResponseCache(Duration = 20)]
     public async Task<IActionResult> GetAllBooks()
     {
         var books = (await _bookRepository.GetAsync(x => true));
