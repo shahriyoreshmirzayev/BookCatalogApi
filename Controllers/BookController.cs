@@ -46,7 +46,7 @@ public class BookController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateBook([FromBody] BookCreateDTO bookCreate)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         Book book = _mapper.Map<Book>(bookCreate);
@@ -65,8 +65,8 @@ public class BookController : ControllerBase
         book = await _bookRepository.AddAsync(book);
         if (book == null) NotFound("Book not found . ....!");
         return Ok(_mapper.Map<BookGetDTO>(book));
-
     }
+
 
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateBook([FromBody] BookUpdateDTO bookCreate)
