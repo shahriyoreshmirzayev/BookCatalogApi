@@ -29,33 +29,42 @@ public class BookController : ControllerBase
     }
 
     [HttpGet("[action]")]
-    [ResponseCache(Duration = 20)]
+    //[ResponseCache(Duration = 20)]
     public async Task<IActionResult> GetAllBooks()
     {
-        bool IsActive = _lazyCache.TryGetValue(_Key, out IEnumerable<BookGetDTO> CacheBooks);
-        if(!IsActive)
+        /*bool IsActive = _lazyCache.TryGetValue(_Key, out IEnumerable<BookGetDTO> CacheBooks);
+        if (!IsActive)
         {
             var books = await _bookRepository.GetAsync(x => true);
-            if(books == null)
-            {
-                IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
 
-                var entryOptions = new MemoryCacheEntryOptions()
-                                   .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
-                                   .SetSlidingExpiration(TimeSpan.FromSeconds(10));
+            IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
 
-                _lazyCache.Add(_Key, booksRes, entryOptions);
-                Console.WriteLine("_lazycache hit.....");
-                return Ok(booksRes);
-            }
-            return NoContent();
+            var entryOptions = new MemoryCacheEntryOptions()
+                               .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
+                               .SetSlidingExpiration(TimeSpan.FromSeconds(10));
+
+            _lazyCache.Add(_Key, booksRes, entryOptions);
+            Console.WriteLine("_lazycache hit.....");
+            return Ok(booksRes);
+
         }
-        return Ok(CacheBooks);
-        
-        
-        
-        
-        
+        return Ok(CacheBooks);*/
+
+
+        IEnumerable<BookGetDTO> res = await _lazyCache.GetOrAdd(_Key,
+            async options =>
+            {
+                options.SetAbsoluteExpiration(TimeSpan.FromSeconds(30));
+                options.SetSlidingExpiration(TimeSpan.FromSeconds(10));
+
+                var books = await _bookRepository.GetAsync(x => true);
+
+                IEnumerable<BookGetDTO> bookRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
+                return bookRes;
+            });
+
+        return Ok(res);
+
 
         /*var books = (await _bookRepository.GetAsync(x => true));
         if (books == null)

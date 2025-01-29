@@ -4,7 +4,9 @@ using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
+using System.Text.Json;
 
 namespace BookCatalogApi.Controllers;
 
@@ -17,16 +19,18 @@ public class AuthorController : ControllerBase
     private readonly IValidator<Author> _validator;
     private readonly IMapper _mapper;
     private readonly IMemoryCache _memoryCache; // keshlash uchun
+    private readonly IDistributedCache _cache;  // Redis uchun
 
     private readonly string _Cashe_Key = "MyKey";
 
-    public AuthorController(IBookRepository bookRepository, IAuthorRepository authorRepository, IValidator<Author> validator, IMapper mapper, IMemoryCache memoryCache)
+    public AuthorController(IBookRepository bookRepository, IAuthorRepository authorRepository, IValidator<Author> validator, IMapper mapper, IMemoryCache memoryCache, IDistributedCache cache)
     {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
         _validator = validator;
         _mapper = mapper;
         _memoryCache = memoryCache;
+        _cache = cache;
     }
 
     [HttpGet("[action]")]
@@ -51,6 +55,25 @@ public class AuthorController : ControllerBase
     //[OutputCache(Duration = 30)]
     public async Task<IActionResult> GetAllAuthors()
     {
+
+        string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
+
+        if(string.IsNullOrEmpty(CachedAuthors))
+        {
+            Task<IQueryable<Author>> Authors = _authorRepository.GetAsync(x => true);
+            IEnumerable<AuthorGetDTO> resAuthors = _mapper.Map<IEnumerable<AuthorGetDTO>>(Authors.Result.AsEnumerable());
+            await _cache.SetStringAsync(_Cashe_Key, JsonSerializer.Serialize(resAuthors), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+            });
+            return Ok(resAuthors);
+        }
+        Console.WriteLine("GetStringAsync return json .......");
+        var res = JsonSerializer.Deserialize<IEnumerable<AuthorGetDTO>>(CachedAuthors);
+        return Ok(res);
+
+
+
         /*bool casheHit = _memoryCache.TryGetValue(_Cashe_Key, out IEnumerable<AuthorGetDTO>? CashedAuthors);
         if (!casheHit)
         {
@@ -67,7 +90,10 @@ public class AuthorController : ControllerBase
             return Ok(resAuthors);
         }*/
 
-        IEnumerable<AuthorGetDTO>? CashedAuthors = _memoryCache.GetOrCreate(_Cashe_Key,
+
+
+
+        /*IEnumerable<AuthorGetDTO>? CashedAuthors = _memoryCache.GetOrCreate(_Cashe_Key,
             opt =>
             {
                 opt.SetSlidingExpiration(TimeSpan.FromSeconds(10));
@@ -78,7 +104,7 @@ public class AuthorController : ControllerBase
                 return resAuthors;
             });
 
-        return Ok(CashedAuthors);
+        return Ok(CashedAuthors);*/
 
     }
 
