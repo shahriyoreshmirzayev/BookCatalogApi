@@ -52,12 +52,14 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet("[action]")]
-    [OutputCache(Duration = 30)]
+    //[OutputCache(Duration = 30)]
     public async Task<IActionResult> GetAllAuthors()
     {
         bool casheHit = _memoryCache.TryGetValue(_Cashe_Key, out IEnumerable<AuthorGetDTO>? CashedAuthors);
         if (!casheHit)
         {
+            await Console.Out.WriteAsync("cashHit = false ......!");
+
             var options = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
                 .SetSlidingExpiration(TimeSpan.FromSeconds(4));
@@ -113,7 +115,8 @@ public class AuthorController : ControllerBase
         author = await _authorRepository.AddAsync(author);
         if (author == null) return NotFound();
         AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
-        _memoryCache.Remove(_Cashe_Key);                             //Keyni o'chirib yuborish
+        _memoryCache.Remove(authorGet.Id);                             //Keyni o'chirib yuborish
+        _memoryCache.Remove(_Cashe_Key);  
         return Ok(authorGet);
 
     }
@@ -122,6 +125,8 @@ public class AuthorController : ControllerBase
     public async Task<IActionResult> DeleteAuthor([FromQuery] int id)
     {
         bool isDelete = await _authorRepository.DeleteAsync(id);
+        _memoryCache.Remove(id);
+        _memoryCache.Remove(_Cashe_Key);
         return isDelete ? Ok("Deleted succesfuly ....") : BadRequest("Delete operation failed");
     }
 
