@@ -4,7 +4,6 @@ using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BookCatalogApi.Controllers;
@@ -17,7 +16,6 @@ public class AuthorController : ControllerBase
     private readonly IAuthorRepository _authorRepository;
     private readonly IValidator<Author> _validator;
     private readonly IMapper _mapper;
-
     private readonly IMemoryCache _memoryCache; // keshlash uchun
 
     private readonly string _Cashe_Key = "MyKey";
@@ -39,8 +37,6 @@ public class AuthorController : ControllerBase
             return Ok(CashedAuthor);
         }
 
-
-
         Author author = await _authorRepository.GetByIdAsync(id);
         if (author == null)
         {
@@ -55,7 +51,7 @@ public class AuthorController : ControllerBase
     //[OutputCache(Duration = 30)]
     public async Task<IActionResult> GetAllAuthors()
     {
-        bool casheHit = _memoryCache.TryGetValue(_Cashe_Key, out IEnumerable<AuthorGetDTO>? CashedAuthors);
+        /*bool casheHit = _memoryCache.TryGetValue(_Cashe_Key, out IEnumerable<AuthorGetDTO>? CashedAuthors);
         if (!casheHit)
         {
             await Console.Out.WriteAsync("cashHit = false ......!");
@@ -69,7 +65,19 @@ public class AuthorController : ControllerBase
             IEnumerable<AuthorGetDTO> resAuthors = _mapper.Map<IEnumerable<AuthorGetDTO>>(Authors);
             _memoryCache.Set(_Cashe_Key, resAuthors, options);
             return Ok(resAuthors);
-        }
+        }*/
+
+        IEnumerable<AuthorGetDTO>? CashedAuthors = _memoryCache.GetOrCreate(_Cashe_Key,
+            opt =>
+            {
+                opt.SetSlidingExpiration(TimeSpan.FromSeconds(10));
+                opt.SetAbsoluteExpiration(TimeSpan.FromSeconds(30));
+
+                Task<IQueryable<Author>> Authors = _authorRepository.GetAsync(x => true);
+                IEnumerable<AuthorGetDTO> resAuthors = _mapper.Map<IEnumerable<AuthorGetDTO>>(Authors.Result.AsEnumerable());
+                return resAuthors;
+            });
+
         return Ok(CashedAuthors);
 
     }
@@ -116,7 +124,7 @@ public class AuthorController : ControllerBase
         if (author == null) return NotFound();
         AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
         _memoryCache.Remove(authorGet.Id);                             //Keyni o'chirib yuborish
-        _memoryCache.Remove(_Cashe_Key);  
+        _memoryCache.Remove(_Cashe_Key);
         return Ok(authorGet);
 
     }

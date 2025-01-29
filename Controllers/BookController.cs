@@ -3,7 +3,9 @@ using BookApplication.DTOs.BookDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
+using LazyCache;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BookCatalogApi.Controllers;
 
@@ -15,25 +17,53 @@ public class BookController : ControllerBase
     private readonly IAuthorRepository _authorRepository;
     private readonly IValidator<Book> _validator;
     private readonly IMapper _mapper;
-    public BookController(IBookRepository bookRepository, IValidator<Book> bookValidator, IMapper mapper, IAuthorRepository authorRepository)
+    private readonly IAppCache _lazyCache;
+    private const string _Key = "MyLazyCache";
+    public BookController(IBookRepository bookRepository, IValidator<Book> bookValidator, IMapper mapper, IAuthorRepository authorRepository, IAppCache lazyCache)
     {
         _bookRepository = bookRepository;
         _validator = bookValidator;
         _mapper = mapper;
         _authorRepository = authorRepository;
+        _lazyCache = lazyCache;
     }
 
     [HttpGet("[action]")]
     [ResponseCache(Duration = 20)]
     public async Task<IActionResult> GetAllBooks()
     {
-        var books = (await _bookRepository.GetAsync(x => true));
+        bool IsActive = _lazyCache.TryGetValue(_Key, out IEnumerable<BookGetDTO> CacheBooks);
+        if(!IsActive)
+        {
+            var books = await _bookRepository.GetAsync(x => true);
+            if(books == null)
+            {
+                IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
+
+                var entryOptions = new MemoryCacheEntryOptions()
+                                   .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
+                                   .SetSlidingExpiration(TimeSpan.FromSeconds(10));
+
+                _lazyCache.Add(_Key, booksRes, entryOptions);
+                Console.WriteLine("_lazycache hit.....");
+                return Ok(booksRes);
+            }
+            return NoContent();
+        }
+        return Ok(CacheBooks);
+        
+        
+        
+        
+        
+
+        /*var books = (await _bookRepository.GetAsync(x => true));
         if (books == null)
         {
             return Ok();
         }
-        IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
-        return Ok(booksRes);
+        IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);*/
+        //return Ok(booksRes);
     }
 
     [HttpGet("[action]/{id}")]
