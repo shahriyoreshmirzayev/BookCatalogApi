@@ -9,6 +9,7 @@ namespace BookCatalogApi
 {
     public class Program
     {
+        static int a = 0;
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -29,7 +30,7 @@ namespace BookCatalogApi
             builder.Services.AddOutputCache();
             builder.Services.AddControllers();
 
-
+        
             builder.Services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -82,7 +83,7 @@ namespace BookCatalogApi
 
             app.Use((context, next) =>
             {
-                Console.WriteLine("Requst coming .....");
+                Console.WriteLine("*********  Requst coming  *********");
                 return next(context);
             });
 
@@ -110,6 +111,13 @@ namespace BookCatalogApi
 
         private static void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
+            if (a % 20 == 0)
+            {
+                Console.WriteLine($"\nA: {a}\n");
+            }
+            a++;
+
+
             //throw new NotImplementedException();
             Console.WriteLine(e.SignalTime);
         }
