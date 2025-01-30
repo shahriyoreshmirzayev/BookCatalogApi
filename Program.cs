@@ -9,7 +9,7 @@ namespace BookCatalogApi
 {
     public class Program
     {
-        static int a = 0;
+        static int a = 30;
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -30,8 +30,8 @@ namespace BookCatalogApi
             builder.Services.AddOutputCache();
             builder.Services.AddControllers();
 
-        
-            builder.Services.AddRateLimiter(options =>
+
+            /*builder.Services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
@@ -47,7 +47,7 @@ namespace BookCatalogApi
                         AutoReplenishment = true,
                         SegmentsPerWindow = 3
                     }));
-            });
+            });*/
 
 
 
@@ -56,12 +56,13 @@ namespace BookCatalogApi
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: "FixedWindowLimiter",
-                    factory: x => new FixedWindowRateLimiterOptions
+                RateLimitPartition.GetTokenBucketLimiter(
+                    partitionKey: "TokenBucketLimiter",
+                    factory: x => new TokenBucketRateLimiterOptions
                     {
-                        PermitLimit = 4,
-                        Window = TimeSpan.FromSeconds(10),
+                        TokenLimit = 10,
+                        ReplenishmentPeriod = TimeSpan.FromSeconds(30),
+                        TokensPerPeriod = 5,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                         QueueLimit = 0,
                         AutoReplenishment = true
@@ -70,10 +71,24 @@ namespace BookCatalogApi
 
 
 
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Elapsed += Timer_Elapsed;
-            timer.Interval = 1000;
-            timer.Start();
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                RateLimitPartition.GetConcurrencyLimiter(
+                    partitionKey: "TokenBucketLimiter",
+                    factory: x => new ConcurrencyLimiterOptions
+                    {
+                        PermitLimit = 2,
+                        QueueLimit = 0,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    }));
+            });
+
+
+
+
 
 
             builder.Services.AddEndpointsApiExplorer();
@@ -83,7 +98,9 @@ namespace BookCatalogApi
 
             app.Use((context, next) =>
             {
-                Console.WriteLine("*********  Requst coming  *********");
+                a--;
+                Console.WriteLine($"\nA: {a}\n");
+                Console.WriteLine("\n*********  Requst coming  *********\n");
                 return next(context);
             });
 
@@ -105,17 +122,22 @@ namespace BookCatalogApi
             app.UseResponseCaching();
             app.UseOutputCache();
             app.MapControllers();
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Elapsed += Timer_Elapsed;
+            timer.Interval = 1000;
+            timer.Start();
 
             app.Run();
         }
 
         private static void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            if (a % 20 == 0)
+            if (a % 30 == 0)
             {
-                Console.WriteLine($"\nA: {a}\n");
+                a += 5;
+                Console.WriteLine($"\nReplanish:=> A: {a}\n");
             }
-            a++;
+            //a++; 
 
 
             //throw new NotImplementedException();
