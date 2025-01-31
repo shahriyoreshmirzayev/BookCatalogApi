@@ -9,7 +9,7 @@ namespace BookCatalogApi
 {
     public class Program
     {
-        static int a = 30;
+        //static int a = 30;
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -29,7 +29,7 @@ namespace BookCatalogApi
             builder.Services.AddOutputCache();
             builder.Services.AddControllers();
 
-            builder.Services.AddRateLimiter(options =>
+            /*builder.Services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
@@ -45,7 +45,7 @@ namespace BookCatalogApi
                         AutoReplenishment = true,
                         SegmentsPerWindow = 3
                     }));
-            });
+            });*/
 
             /*builder.Services.AddRateLimiter(options =>
             {
@@ -85,15 +85,15 @@ namespace BookCatalogApi
 
             var app = builder.Build();
 
-            app.Use((context, next) =>
+            /*app.Use((context, next) =>
             {
                 a--;
                 Console.WriteLine($"\nA: {a}\n");
                 Console.WriteLine("\n*********  Requst coming  *********\n");
                 return next(context);
-            });
+            });*/
 
-            app.UseRateLimiter();
+            //app.UseRateLimiter();
 
             if (app.Environment.IsDevelopment())
             {
@@ -108,15 +108,15 @@ namespace BookCatalogApi
             app.UseResponseCaching();
             app.UseOutputCache();
             app.MapControllers();
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Elapsed += Timer_Elapsed;
-            timer.Interval = 1000;
-            timer.Start();
+            //System.Timers.Timer timer = new System.Timers.Timer();
+            //timer.Elapsed += Timer_Elapsed;
+            //timer.Interval = 1000;
+            //timer.Start();
 
             app.Run();
         }
 
-        private static void Timer_Elapsed(object? sender, ElapsedEventArgs e)
+        /*private static void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
             if (a % 30 == 0)
             {
@@ -128,6 +128,6 @@ namespace BookCatalogApi
 
             //throw new NotImplementedException();
             Console.WriteLine(e.SignalTime);
-        }
+        }*/
     }
 }
