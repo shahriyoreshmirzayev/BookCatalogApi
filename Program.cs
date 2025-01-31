@@ -25,13 +25,11 @@ namespace BookCatalogApi
 
             });
 
-
             builder.Services.AddResponseCaching();
             builder.Services.AddOutputCache();
             builder.Services.AddControllers();
 
-
-            /*builder.Services.AddRateLimiter(options =>
+            builder.Services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
@@ -47,9 +45,7 @@ namespace BookCatalogApi
                         AutoReplenishment = true,
                         SegmentsPerWindow = 3
                     }));
-            });*/
-
-
+            });
 
             /*builder.Services.AddRateLimiter(options =>
             {
@@ -69,9 +65,7 @@ namespace BookCatalogApi
                     }));
             });*/
 
-
-
-            builder.Services.AddRateLimiter(options =>
+            /*builder.Services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
@@ -84,12 +78,7 @@ namespace BookCatalogApi
                         QueueLimit = 0,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                     }));
-            });
-
-
-
-
-
+            });*/
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -105,9 +94,6 @@ namespace BookCatalogApi
             });
 
             app.UseRateLimiter();
-
-           
-
 
             if (app.Environment.IsDevelopment())
             {
