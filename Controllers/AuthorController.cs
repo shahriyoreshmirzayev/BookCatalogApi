@@ -3,6 +3,7 @@ using BookApplication.DTOs.AuthorDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -53,6 +54,7 @@ public class AuthorController : ControllerBase
 
     [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
+    [Authorize]
     public async Task<IActionResult> GetAllAuthors()
     {
 
