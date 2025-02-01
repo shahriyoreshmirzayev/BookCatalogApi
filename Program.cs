@@ -25,6 +25,8 @@ namespace BookCatalogApi
 
             });
 
+
+
             builder.Services.AddResponseCaching();
             builder.Services.AddOutputCache();
             builder.Services.AddControllers();
