@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BookApplication.Abstraction;
+using BookApplication.DTOs.UserDTO;
 using BookApplication.Extensions;
 using BookApplication.Models;
 using BookApplication.Repositories;
@@ -22,9 +23,6 @@ public class AccountController : ControllerBase
         _userRepository = userRepository;
         _mapper = mapper;
     }
-
-
-
     [HttpGet("[action]")]
     public async Task<IActionResult> Login([FromForm] UserCredentials userCredentials)
     {
@@ -32,22 +30,36 @@ public class AccountController : ControllerBase
         x.Email == userCredentials.Email)).FirstOrDefault();
         if (user != null)
         {
-            return Ok(_tokenService.CreateToken(user));
+            Token token = new()
+            {
+                AccesToken = _tokenService.CreateToken(user)
+            };
+            return Ok(token);
         }
         return BadRequest("Login pr passwrod is Incorrect ......!");
     }
     [HttpPost]
     [Route("Register")]
-    public async Task<IActionResult> Create([FromBody] User user)
+    public async Task<IActionResult> Create([FromBody] UserCreateDTO NewUser)
     {
         if (ModelState.IsValid)
         {
+            User user = _mapper.Map<User>(NewUser);
             user.Password = user.Password.GetHash();
             user = await _userRepository.AddAsync(user);
             if (user != null)
             {
-                string token = _tokenService.CreateToken(user);
-                return Ok(token);
+                Token token = new()
+                {
+                    AccesToken = _tokenService.CreateToken(user)
+                };
+                RegistiredUserDTO userDTO = new()
+                {
+                    User = user,
+                    UsersTokens = token
+                };
+                userDTO.UsersTokens = token;
+                return Ok(userDTO);
             }
         }
         return BadRequest();
