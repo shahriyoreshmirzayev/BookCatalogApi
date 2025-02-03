@@ -34,7 +34,12 @@ public class AccountController : ControllerBase
             {
                 AccesToken = _tokenService.CreateToken(user)
             };
-            return Ok(token);
+            RegistiredUserDTO userDTO = new()
+            {
+                User = user,
+                UsersTokens = token
+            };
+            return Ok(userDTO);
         }
         return BadRequest("Login pr passwrod is Incorrect ......!");
     }
