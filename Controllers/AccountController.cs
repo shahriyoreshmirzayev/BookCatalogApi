@@ -1,4 +1,5 @@
-﻿using BookApplication.Abstraction;
+﻿using AutoMapper;
+using BookApplication.Abstraction;
 using BookApplication.Extensions;
 using BookApplication.Models;
 using BookApplication.Repositories;
@@ -13,46 +14,51 @@ public class AccountController : ControllerBase
 {
     private readonly ITokenService _tokenService;
     private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
 
-    public AccountController(ITokenService tokenService, IUserRepository userRepository)
+    public AccountController(ITokenService tokenService, IUserRepository userRepository, IMapper mapper)
     {
         _tokenService = tokenService;
         _userRepository = userRepository;
+        _mapper = mapper;
     }
 
 
 
-    [HttpGet]
-    public IActionResult Login([FromForm] UserCredentials userCredentials)
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Login([FromForm] UserCredentials userCredentials)
     {
-        var user = _userRepository.GetAsync(x => x.Password.GetHash() == userCredentials.Password.GetHash() &&
-        x.Email == userCredentials.Email);
+        var user = (await _userRepository.GetAsync(x => x.Password.GetHash() == userCredentials.Password.GetHash() &&
+        x.Email == userCredentials.Email)).FirstOrDefault();
         if (user != null)
         {
-            return Ok(_tokenService.CreateToken());
+            return Ok(_tokenService.CreateToken(user));
         }
         return BadRequest("Login pr passwrod is Incorrect ......!");
     }
     [HttpPost]
-    [Route("Create")]
+    [Route("Register")]
     public async Task<IActionResult> Create([FromBody] User user)
     {
         if (ModelState.IsValid)
         {
-            if (await _userRepository.AddAsync(user) != null)
+            user.Password = user.Password.GetHash();
+            user = await _userRepository.AddAsync(user);
+            if (user != null)
             {
-                return Ok();
+                string token = _tokenService.CreateToken(user);
+                return Ok(token);
             }
         }
         return BadRequest();
     }
-    [HttpGet]
+    [HttpGet("[action]")]
     public async Task<IActionResult> GetAllUsers()
     {
         IQueryable<User> res = await _userRepository.GetAsync(x => true);
         return Ok(res);
     }
-    [HttpPut]
+    [HttpPut("[action]")]
     public async Task<IActionResult> UpdateUser([FromBody] User user)
     {
         if(ModelState.IsValid)
