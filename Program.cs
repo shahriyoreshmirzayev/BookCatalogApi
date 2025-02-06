@@ -1,10 +1,7 @@
 
 using BookApplication;
 using BookInfrastructure;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
-using System.Threading.RateLimiting;
-using System.Timers;
 
 namespace BookCatalogApi
 {
@@ -45,7 +42,7 @@ namespace BookCatalogApi
                     }
                 });
             });
-            
+
 
             builder.Services.AddMemoryCache();
             builder.Services.AddStackExchangeRedisCache(setupAction =>
