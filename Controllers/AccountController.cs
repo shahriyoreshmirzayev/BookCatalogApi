@@ -5,6 +5,7 @@ using BookApplication.Extensions;
 using BookApplication.Models;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookCatalogApi.Controllers;
@@ -30,14 +31,11 @@ public class AccountController : ControllerBase
         x.Email == userCredentials.Email)).FirstOrDefault();
         if (user != null)
         {
-            Token token = new()
-            {
-                AccesToken = _tokenService.CreateToken(user)
-            };
+
             RegistiredUserDTO userDTO = new()
             {
                 User = user,
-                UsersTokens = token
+                UsersTokens = await _tokenService.CreateTokenAsync(user)
             };
             return Ok(userDTO);
         }
@@ -53,32 +51,63 @@ public class AccountController : ControllerBase
             user.Password = user.Password.GetHash();
             user = await _userRepository.AddAsync(user);
             if (user != null)
-            {
-                Token token = new()
-                {
-                    AccesToken = _tokenService.CreateToken(user)
-                };
+            { 
                 RegistiredUserDTO userDTO = new()
                 {
                     User = user,
-                    UsersTokens = token
+                    UsersTokens = await _tokenService.CreateTokenAsync(user)
                 };
-                userDTO.UsersTokens = token;
                 return Ok(userDTO);
             }
         }
         return BadRequest();
     }
+
+
+    [HttpPost]
+    [AllowAnonymous]
+    [Route("Refresh")]
+    public async Task<IActionResult> Refresh([FromBody] Token tokens)
+    {
+        var principal = _tokenService.GetClaimsFromExpiredToken(tokens.AccesToken);
+        string? email = principal.Identity?.Name;
+        if (email == null)
+        {
+            return NotFound("Refresh token not found ....");
+        }
+        RefreshToken? savedRefreshToken = _tokenService.Get(x => x.Email == email &&
+                                                        x.RefreshTokenValue == tokens.RefreshToken)
+                                                        .FirstOrDefault();
+
+
+
+        if (savedRefreshToken == null)
+        {
+            return BadRequest("Refresh token or Acces token inValid ......");
+        }
+        if (savedRefreshToken.ExpiredDate < DateTime.UtcNow) 
+        {
+            _tokenService.Delete(savedRefreshToken);
+            return StatusCode(405, "Refresh token already expired");
+        }
+        Token newTokens = await _tokenService.CreateTokensFromRefresh(principal, savedRefreshToken);
+
+        return Ok(newTokens);
+    } 
+
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllUsers()
     {
         IQueryable<User> res = await _userRepository.GetAsync(x => true);
         return Ok(res);
     }
+
+
+
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateUser([FromBody] User user)
     {
-        if(ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             user = await _userRepository.UpdateAsync(user);
             return Ok(user);
