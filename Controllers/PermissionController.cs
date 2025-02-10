@@ -56,13 +56,9 @@ public class PermissionController : ControllerBase
     public async Task<IActionResult> UpdatePermission([FromBody] Permission PermissionUpdateDTO)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        Permission permission1 = _mapper.Map<Permission>(PermissionUpdateDTO);
-        var validationRes = _validator.Validate(PermissionUpdateDTO);
-        if (validationRes.IsValid)
-        {
-            return BadRequest(validationRes);
-        }
-        PermissionUpdateDTO = await _PermissionRepository.AddAsync(PermissionUpdateDTO);
+        Permission permission = _mapper.Map<Permission>(PermissionUpdateDTO);
+        
+        permission = await _PermissionRepository.AddAsync(PermissionUpdateDTO);
         if (PermissionUpdateDTO == null) return NotFound();
         return Ok(PermissionUpdateDTO);
     }
