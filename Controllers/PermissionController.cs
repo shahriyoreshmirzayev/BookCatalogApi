@@ -2,12 +2,11 @@
 using BookApplication.DTOs.PermissionDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookCatalogApi.Controllers;
 
-[Microsoft.AspNetCore.Mvc.Route("api/[controller]")]
+[Route("api/[controller]")]
 [ApiController]
 public class PermissionController : ControllerBase
 {
@@ -55,11 +54,11 @@ public class PermissionController : ControllerBase
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdatePermission([FromBody] Permission PermissionUpdateDTO)
     {
-        if (!ModelState.IsValid) 
+        if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         Permission permission = _mapper.Map<Permission>(PermissionUpdateDTO);
-        
+
         permission = await _permissionRepository.UpdateAsync(PermissionUpdateDTO);
         if (PermissionUpdateDTO == null) return NotFound();
         return Ok(permission);
