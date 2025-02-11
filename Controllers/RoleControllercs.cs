@@ -1,14 +1,9 @@
 ﻿using AutoMapper;
-using BookApplication.DTOs.AuthorDTO;
 using BookApplication.DTOs.RoleDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Security;
-using System.Text.Json;
 
 namespace BookCatalogApi.Controllers;
 
@@ -44,36 +39,36 @@ public class RoleControllercs : ControllerBase
     public async Task<IActionResult> GetAllRole()
     {
         IQueryable<Role> Roles = await _roleRepository.GetAsync(x => true);
-        return Ok(Roles);  
+        return Ok(Roles);
     }
 
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateRole([FromBody] RoleCreateDTO createDTO)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        Role role = _mapper.Map<Role>(createDTO);
+        List<Permission> permissions = new List<Permission>();
+        for (int i = 0; i < role.Permissions.Count; i++)
         {
-            Role role = _mapper.Map<Role>(createDTO);
-            List<Permission> permissions = new List<Permission>();
-            for(int i = 0; i < role.Permissions.Count; i++)
+            Permission permission = role.Permissions.ToArray()[i];
+            permission = await _permissionRepository.GetByIdAsync(permission.PermissionId);
+            if (permission == null)
             {
-                Permission permission = role.Permissions.ToArray()[i];
-                permission = await _permissionRepository.GetByIdAsync(permission.PermissionId);
-                if (permission == null)
-                {
-                    return NotFound($"Permission not found ID: {permission.PermissionId}");
-                }
-                else
-                {
-                    permissions.Add(permission);
-                }
+                return NotFound($"Permission not found ID: {permission.PermissionId}");
             }
-            role.Permissions = permissions; 
-            role = await _roleRepository.AddAsync(role);
-            if (role == null) return BadRequest(ModelState);
-            AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(role);
-            return Ok(authorGet);
+            else
+            {
+                permissions.Add(permission);
+            }
         }
-        return BadRequest(ModelState);
+        role.Permissions = permissions;
+        role = await _roleRepository.AddAsync(role);
+        if (role == null) return BadRequest(ModelState);
+        RoleGetDTO roleGet = _mapper.Map<RoleGetDTO>(role);
+        return Ok(roleGet);
+
     }
 
     [HttpPut("[action]")]
@@ -82,16 +77,16 @@ public class RoleControllercs : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         Role role = _mapper.Map<Role>(updateDTO);
-        List <Permission> permissions = new List<Permission>();
-        for(int i = 0;i < role.Permissions.Count;i++)
+        List<Permission> permissions = new List<Permission>();
+        for (int i = 0; i < role.Permissions.Count; i++)
         {
             Permission permission = role.Permissions.ToArray()[i];
             permission = await _permissionRepository.GetByIdAsync(permission.PermissionId);
-            if(permission == null)
+            if (permission == null)
             {
                 return NotFound($"Permission not found");
             }
-            permissions.Add (permission);
+            permissions.Add(permission);
         }
         role.Permissions = permissions;
         role = await _roleRepository.UpdateAsync(role);
@@ -107,6 +102,5 @@ public class RoleControllercs : ControllerBase
 
         return isDelete ? Ok("Deleted succesfuly ....") : BadRequest("Delete operation failed");
     }
-
 
 }
