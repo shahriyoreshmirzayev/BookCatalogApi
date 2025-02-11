@@ -12,13 +12,13 @@ namespace BookCatalogApi.Controllers;
 public class PermissionController : ControllerBase
 {
     private readonly IPermissionRepository _PermissionRepository;
-    private readonly IValidator<Permission> _validator;
+    //private readonly IValidator<Permission> _validator;
     private readonly IMapper _mapper;
 
-    public PermissionController(IPermissionRepository PermissionRepository, IValidator<Permission> validator, IMapper mapper)
+    public PermissionController(IPermissionRepository PermissionRepository, /*IValidator<Permission> validator,*/ IMapper mapper)
     {
         _PermissionRepository = PermissionRepository;
-        _validator = validator;
+        //_validator = validator;
         _mapper = mapper;
     }
 
