@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using BookApplication.DTOs.AuthorDTO;
+using BookApplication.DTOs.RoleDTO;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
+using System.Security;
 using System.Text.Json;
 
 namespace BookCatalogApi.Controllers;
@@ -15,12 +17,14 @@ namespace BookCatalogApi.Controllers;
 public class RoleControllercs : ControllerBase
 {
     private readonly IRoleRepository _roleRepository;
+    private readonly IPermissionRepository _permissionRepository;
     private readonly IMapper _mapper;
 
-    public RoleControllercs(IRoleRepository roleRepository, IMapper mapper)
+    public RoleControllercs(IRoleRepository roleRepository, IMapper mapper, IPermissionRepository permissionRepository)
     {
         _roleRepository = roleRepository;
         _mapper = mapper;
+        _permissionRepository = permissionRepository;
     }
 
     [HttpGet("[action]")]
@@ -44,17 +48,28 @@ public class RoleControllercs : ControllerBase
     }
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> CreateRole([FromBody] AuthorCreateDTO createDTO)
+    public async Task<IActionResult> CreateRole([FromBody] RoleCreateDTO createDTO)
     {
         if (ModelState.IsValid)
         {
             Role role = _mapper.Map<Role>(createDTO);
-            var validResult = _validator.Validate(role);
-            if (!validResult.IsValid) return BadRequest(validResult);
-
-
+            List<Permission> permissions = new List<Permission>();
+            for(int i = 0; i < role.Permissions.Count; i++)
+            {
+                Permission permission = role.Permissions.ToArray()[i];
+                permission = await _permissionRepository.GetByIdAsync(permission.PermissionId);
+                if (permission == null)
+                {
+                    return NotFound($"Permission not found ID: {permission.PermissionId}");
+                }
+                else
+                {
+                    permissions.Add(permission);
+                }
+            }
+            role.Permissions = permissions; 
             role = await _roleRepository.AddAsync(role);
-            if (role == null) return NotFound();
+            if (role == null) return BadRequest(ModelState);
             AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(role);
             return Ok(authorGet);
         }
@@ -62,24 +77,27 @@ public class RoleControllercs : ControllerBase
     }
 
     [HttpPut("[action]")]
-    public async Task<IActionResult> UpdateRole([FromBody] AuthorUpdateDTO createDTO)
+    public async Task<IActionResult> UpdateRole([FromBody] RoleUpdateDTO updateDTO)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        Author author = _mapper.Map<Author>(createDTO);
-        var validationRes = _validator.Validate(author);
-        if (validationRes.IsValid)
+        Role role = _mapper.Map<Role>(updateDTO);
+        List <Permission> permissions = new List<Permission>();
+        for(int i = 0;i < role.Permissions.Count;i++)
         {
-            return BadRequest(validationRes);
+            Permission permission = role.Permissions.ToArray()[i];
+            permission = await _permissionRepository.GetByIdAsync(permission.PermissionId);
+            if(permission == null)
+            {
+                return NotFound($"Permission not found");
+            }
+            permissions.Add (permission);
         }
-
-        author = await _authorRepository.AddAsync(author);
-        if (author == null) return NotFound();
-        AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
-        _memoryCache.Remove(authorGet.Id);                             //Keyni o'chirib yuborish
-        _memoryCache.Remove(_Cashe_Key);
-        return Ok(authorGet);
-
+        role.Permissions = permissions;
+        role = await _roleRepository.UpdateAsync(role);
+        if (role == null) return BadRequest(ModelState);
+        RoleGetDTO rolGet = _mapper.Map<RoleGetDTO>(role);
+        return Ok(rolGet);
     }
 
     [HttpDelete("[action]")]
