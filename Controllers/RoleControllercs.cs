@@ -68,7 +68,6 @@ public class RoleControllercs : ControllerBase
         if (role == null) return BadRequest(ModelState);
         RoleGetDTO roleGet = _mapper.Map<RoleGetDTO>(role);
         return Ok(roleGet);
-
     }
 
     [HttpPut("[action]")]
