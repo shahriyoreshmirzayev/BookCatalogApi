@@ -35,7 +35,7 @@ public class RoleControllercs : ControllerBase
 
     [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> GetAllRole()
     {
         IQueryable<Role> Roles = await _roleRepository.GetAsync(x => true);
