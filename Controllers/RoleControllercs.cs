@@ -49,7 +49,7 @@ public class RoleControllercs : ControllerBase
             return BadRequest(ModelState);
 
         Role role = _mapper.Map<Role>(createDTO);
-        List<Permission> permissions = new List<Permission>();
+        List<Permission> permissions = new(); 
         for (int i = 0; i < role.Permissions.Count; i++)
         {
             Permission permission = role.Permissions.ToArray()[i];
@@ -76,20 +76,10 @@ public class RoleControllercs : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         Role role = _mapper.Map<Role>(updateDTO);
-        List<Permission> permissions = new List<Permission>();
-        for (int i = 0; i < role.Permissions.Count; i++)
-        {
-            Permission permission = role.Permissions.ToArray()[i];
-            permission = await _permissionRepository.GetByIdAsync(permission.PermissionId);
-            if (permission == null)
-            {
-                return NotFound($"Permission not found");
-            }
-            permissions.Add(permission);
-        }
-        role.Permissions = permissions;
+       
         role = await _roleRepository.UpdateAsync(role);
         if (role == null) return BadRequest(ModelState);
+       
         RoleGetDTO roleGet = _mapper.Map<RoleGetDTO>(role);
         return Ok(roleGet);
     }
@@ -98,8 +88,8 @@ public class RoleControllercs : ControllerBase
     public async Task<IActionResult> DeleteRole([FromQuery] int id)
     {
         bool isDelete = await _roleRepository.DeleteAsync(id);
-
-        return isDelete ? Ok("Deleted succesfuly ....") : BadRequest("Delete operation failed");
+        return isDelete ? Ok("Deleted succesfuly ....") 
+            : BadRequest("Delete operation failed");
     }
 
 }
