@@ -90,8 +90,8 @@ public class RoleControllercs : ControllerBase
         role.Permissions = permissions;
         role = await _roleRepository.UpdateAsync(role);
         if (role == null) return BadRequest(ModelState);
-        RoleGetDTO rolGet = _mapper.Map<RoleGetDTO>(role);
-        return Ok(rolGet);
+        RoleGetDTO roleGet = _mapper.Map<RoleGetDTO>(role);
+        return Ok(roleGet);
     }
 
     [HttpDelete("[action]")]
