@@ -156,7 +156,9 @@ public class UserController : ControllerBase
 
             if (user != null)
             {
-                if (userChangedPassword.CurrentPassword.GetHash() == user.Password.GetHash()
+                string CurrentHash = userChangedPassword.CurrentPassword.GetHash();
+                //string DbHash = user.Password;
+                if (CurrentHash == user.Password
                     && userChangedPassword.NewPassword == userChangedPassword.ConfirmNewPassword)
                 {
                     user.Password = userChangedPassword.NewPassword.GetHash();
