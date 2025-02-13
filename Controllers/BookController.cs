@@ -4,6 +4,7 @@ using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using LazyCache;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -30,6 +31,7 @@ public class BookController : ControllerBase
 
     [HttpGet("[action]")]
     //[ResponseCache(Duration = 20)]
+    [Authorize(Roles = "GetAllBooks")]
     public async Task<IActionResult> GetAllBooks()
     {
         /*bool IsActive = _lazyCache.TryGetValue(_Key, out IEnumerable<BookGetDTO> CacheBooks);
@@ -76,6 +78,7 @@ public class BookController : ControllerBase
     }
 
     [HttpGet("[action]/{id}")]
+    [Authorize(Roles = "GetBookId")]
     public async Task<IActionResult> GetBookById(int id)
     {
         Book book = await _bookRepository.GetByIdAsync(id);
@@ -107,7 +110,6 @@ public class BookController : ControllerBase
         return Ok(_mapper.Map<BookGetDTO>(book));
     }
 
-
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateBook([FromBody] BookUpdateDTO bookCreate)
     {
@@ -135,6 +137,7 @@ public class BookController : ControllerBase
         return Ok(_mapper.Map<BookGetDTO>(book));
 
     }
+
     [HttpDelete("[action]")]
     public async Task<IActionResult> DeleteBook([FromQuery] int bookId)
     {
@@ -144,4 +147,5 @@ public class BookController : ControllerBase
         }
         return BadRequest("Delete operation failed .....");
     }
+
 }

@@ -85,9 +85,6 @@ public class AccountController : ControllerBase
         return BadRequest();
     }
 
-
-
-
     [HttpPost]
     [AllowAnonymous]
     [Route("Refresh")]

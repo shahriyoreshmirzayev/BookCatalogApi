@@ -42,15 +42,12 @@ namespace BookCatalogApi
                 });
             });
 
-
             builder.Services.AddMemoryCache();
             builder.Services.AddStackExchangeRedisCache(setupAction =>
             {
                 setupAction.Configuration = builder.Configuration.GetConnectionString("RedisConnectionString");
 
             });
-
-
 
             builder.Services.AddResponseCaching();
             builder.Services.AddOutputCache();

@@ -5,6 +5,7 @@ using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
@@ -35,6 +36,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet("[action]")]
+    [Authorize(Roles = "GetByIdAuthor")]
     public async Task<IActionResult> GetAuthorById([FromQuery] int id)
     {
         if (_memoryCache.TryGetValue(id.ToString(), out AuthorGetDTO CashedAuthor))
@@ -54,13 +56,37 @@ public class AuthorController : ControllerBase
 
     [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
-    [Authorize(Roles ="GetAuthor")]
+    [Authorize]
     public async Task<IActionResult> GetAllAuthors()
     {
+        /*string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
 
+        if (string.IsNullOrEmpty(CachedAuthors))
+        {
+            // Ma'lumotlarni asinxron yuklash
+            IQueryable<Author> query = await _authorRepository.GetAsync(x => true);
+            List<Author> Authors = await query.ToListAsync();
+
+
+            // DTO ga xaritalash
+            IEnumerable<AuthorGetDTO> resAuthors = _mapper.Map<IEnumerable<AuthorGetDTO>>(Authors);
+
+            // Cache-ga yozish
+            await _cache.SetStringAsync(_Cashe_Key, JsonSerializer.Serialize(resAuthors), new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+            });
+
+            return Ok(resAuthors);
+        }
+
+        Console.WriteLine("GetStringAsync return json .......");
+        var res = JsonSerializer.Deserialize<IEnumerable<AuthorGetDTO>>(CachedAuthors);
+        return Ok(res);*/
+        // PDP Online kodi
         string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
 
-        if(string.IsNullOrEmpty(CachedAuthors))
+        if (string.IsNullOrEmpty(CachedAuthors))
         {
             Task<IQueryable<Author>> Authors = _authorRepository.GetAsync(x => true);
             IEnumerable<AuthorGetDTO> resAuthors = _mapper.Map<IEnumerable<AuthorGetDTO>>(Authors.Result.AsEnumerable());
@@ -76,7 +102,7 @@ public class AuthorController : ControllerBase
 
 
 
-        /*bool casheHit = _memoryCache.TryGetValue(_Cashe_Key, out IEnumerable<AuthorGetDTO>? CashedAuthors);
+        bool casheHit = _memoryCache.TryGetValue(_Cashe_Key, out IEnumerable<AuthorGetDTO>? CashedAuthors);
         if (!casheHit)
         {
             await Console.Out.WriteAsync("cashHit = false ......!");
@@ -90,7 +116,7 @@ public class AuthorController : ControllerBase
             IEnumerable<AuthorGetDTO> resAuthors = _mapper.Map<IEnumerable<AuthorGetDTO>>(Authors);
             _memoryCache.Set(_Cashe_Key, resAuthors, options);
             return Ok(resAuthors);
-        }*/
+        }
 
 
 
@@ -111,6 +137,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpPost("[action]")]
+    [Authorize(Roles = "CreateAuthor")]
     public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateDTO createDTO)
     {
         if (ModelState.IsValid)
@@ -137,6 +164,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpPut("[action]")]
+    [Authorize(Roles = "UpdateAuthor")]
     public async Task<IActionResult> UpdateAuthor([FromBody] AuthorUpdateDTO createDTO)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -158,6 +186,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpDelete("[action]")]
+    [Authorize(Roles = "DeletAuthor")]
     public async Task<IActionResult> DeleteAuthor([FromQuery] int id)
     {
         bool isDelete = await _authorRepository.DeleteAsync(id);
