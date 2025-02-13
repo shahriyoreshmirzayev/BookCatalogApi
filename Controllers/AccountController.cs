@@ -27,7 +27,7 @@ public class AccountController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> Login([FromForm] UserCredentials userCredentials)
     {
-        var user = (await _userRepository.GetAsync(x => x.Password.GetHash() == userCredentials.Password.GetHash() &&
+        var user = (await _userRepository.GetAsync(x => x.Password == userCredentials.Password.GetHash() &&
         x.Email == userCredentials.Email)).FirstOrDefault();
         if (user != null)
         {
@@ -41,6 +41,28 @@ public class AccountController : ControllerBase
         }
         return BadRequest("Login pr passwrod is Incorrect ......!");
     }
+    // Login uchun ChatGPT qilib bergan kod
+    /*public async Task<IActionResult> Login([FromForm] UserCredentials userCredentials)
+    {
+        string hashedPassword = userCredentials.Password.GetHash(); // Parolni oldindan xesh qilish
+
+        var user = (await _userRepository.GetAsync(x => x.Email == userCredentials.Email))
+            .FirstOrDefault(x => x.Password == hashedPassword); // Faqat bazadan email bo‘yicha olish
+
+        if (user != null)
+        {
+            RegistiredUserDTO userDTO = new()
+            {
+                User = user,
+                UsersTokens = await _tokenService.CreateTokenAsync(user)
+            };
+            return Ok(userDTO);
+        }
+        return BadRequest("Login yoki parol noto‘g‘ri!");
+    }*/ 
+
+
+
     [HttpPost]
     [Route("Register")]
     public async Task<IActionResult> Create([FromBody] UserCreateDTO NewUser)
@@ -51,7 +73,7 @@ public class AccountController : ControllerBase
             user.Password = user.Password.GetHash();
             user = await _userRepository.AddAsync(user);
             if (user != null)
-            { 
+            {
                 RegistiredUserDTO userDTO = new()
                 {
                     User = user,
@@ -62,6 +84,8 @@ public class AccountController : ControllerBase
         }
         return BadRequest();
     }
+
+
 
 
     [HttpPost]

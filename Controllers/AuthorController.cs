@@ -54,7 +54,7 @@ public class AuthorController : ControllerBase
 
     [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
-    [Authorize]
+    [Authorize(Roles ="GetAuthor")]
     public async Task<IActionResult> GetAllAuthors()
     {
 
