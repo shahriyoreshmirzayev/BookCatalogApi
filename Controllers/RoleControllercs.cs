@@ -9,6 +9,7 @@ namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class RoleControllercs : ControllerBase
 {
     private readonly IRoleRepository _roleRepository;
@@ -91,5 +92,4 @@ public class RoleControllercs : ControllerBase
         return isDelete ? Ok("Deleted succesfuly ....") 
             : BadRequest("Delete operation failed");
     }
-
 }
