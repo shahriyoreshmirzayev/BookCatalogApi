@@ -19,7 +19,7 @@ public class PermissionController : ControllerBase
         _permissionRepository = permissionRepository;
         //_validator = validator;
         _mapper = mapper;
-    }
+    }   
 
     [HttpGet("[action]")]
     public async Task<IActionResult> GetPermissionById([FromQuery] int id)

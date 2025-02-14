@@ -3,12 +3,14 @@ using BookApplication.DTOs.UserDTO;
 using BookApplication.Extensions;
 using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
@@ -22,6 +24,7 @@ public class UserController : ControllerBase
         _mapper = mapper;
     }
 
+    //[CustomAuthorizationFilter()]
     [HttpGet("[action]")]
     public async Task<IActionResult> GetRoleById([FromQuery] int id)
     {
