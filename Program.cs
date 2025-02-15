@@ -1,7 +1,10 @@
 
 using BookApplication;
 using BookInfrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 namespace BookCatalogApi
 {
@@ -127,7 +130,11 @@ namespace BookCatalogApi
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
+            app.UseAuthentication(); // Foydalanuvchi autentifikatsiyasi tekshiriladi
+            app.UseAuthorization(); // Ruxsatlar tekshiriladi
+
+
 
             app.UseResponseCaching();
             app.UseOutputCache();

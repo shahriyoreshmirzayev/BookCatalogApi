@@ -2,6 +2,7 @@
 using BookApplication.DTOs.UserDTO;
 using BookApplication.Extensions;
 using BookApplication.Repositories;
+using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,9 @@ public class UserController : ControllerBase
         _mapper = mapper;
     }
 
-    //[CustomAuthorizationFilter()]
+    [CustomAuthorizationFilter(permission: "GetUserById")]
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetRoleById([FromQuery] int id)
+    public async Task<IActionResult> GetUserById([FromQuery] int id)
     {
         User user = await _userRepository.GetByIdAsync(id);
         if (user == null)
@@ -38,7 +39,7 @@ public class UserController : ControllerBase
 
     [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> GetAllUser()
     {
         IQueryable<User> Users = await _userRepository.GetAsync(x => true);

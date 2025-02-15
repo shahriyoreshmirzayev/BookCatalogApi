@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace BookCatalogApi.Filters;
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 
 public class CustomAuthorizationFilterAttribute : Attribute, IAuthorizationFilter
 {
@@ -14,7 +15,7 @@ public class CustomAuthorizationFilterAttribute : Attribute, IAuthorizationFilte
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
-        if(!context.HttpContext.User.Identity.IsAuthenticated)
+        if (!context.HttpContext.User.Identity.IsAuthenticated)
         {
             context.Result = new UnauthorizedResult();
             return;
