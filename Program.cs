@@ -1,10 +1,7 @@
 
 using BookApplication;
 using BookInfrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 namespace BookCatalogApi
 {
@@ -112,16 +109,6 @@ namespace BookCatalogApi
 
             var app = builder.Build();
 
-            /*app.Use((context, next) =>
-            {
-                a--;
-                Console.WriteLine($"\nA: {a}\n");
-                Console.WriteLine("\n*********  Requst coming  *********\n");
-                return next(context);
-            });*/
-
-            //app.UseRateLimiter();
-
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -131,34 +118,17 @@ namespace BookCatalogApi
             app.UseHttpsRedirection();
 
             //app.UseAuthorization();
-            app.UseAuthentication(); // Foydalanuvchi autentifikatsiyasi tekshiriladi
             app.UseAuthorization(); // Ruxsatlar tekshiriladi
 
-
+            app.UseAuthentication(); // Foydalanuvchi autentifikatsiyasi tekshiriladi
 
             app.UseResponseCaching();
+
             app.UseOutputCache();
+            //app.UseETagger();
             app.MapControllers();
-            //System.Timers.Timer timer = new System.Timers.Timer();
-            //timer.Elapsed += Timer_Elapsed;
-            //timer.Interval = 1000;
-            //timer.Start();
 
             app.Run();
         }
-
-        /*private static void Timer_Elapsed(object? sender, ElapsedEventArgs e)
-        {
-            if (a % 30 == 0)
-            {
-                a += 5;
-                Console.WriteLine($"\nReplanish:=> A: {a}\n");
-            }
-            //a++; 
-
-
-            //throw new NotImplementedException();
-            Console.WriteLine(e.SignalTime);
-        }*/
     }
 }

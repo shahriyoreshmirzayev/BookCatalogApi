@@ -6,11 +6,13 @@ namespace BookCatalogApi.Filters;
 
 public class CustomAuthorizationFilterAttribute : Attribute, IAuthorizationFilter
 {
-    private readonly string _permission;
+    private readonly string _value;
+    private readonly string _key;
 
-    public CustomAuthorizationFilterAttribute(string permission)
+    public CustomAuthorizationFilterAttribute(string value, string key = "permission")
     {
-        _permission = permission;
+        _value = value;
+        _key = key;
     }
 
     public void OnAuthorization(AuthorizationFilterContext context)
@@ -22,7 +24,8 @@ public class CustomAuthorizationFilterAttribute : Attribute, IAuthorizationFilte
         }
 
         var permissionClaim = context.HttpContext.User.Claims
-            .FirstOrDefault(c => c.Type == "permission" && c.Value == _permission);
+            .FirstOrDefault(c => c.Type.Equals(_key, StringComparison.OrdinalIgnoreCase)
+            && c.Value.Equals(_value, StringComparison.OrdinalIgnoreCase));
 
         if (permissionClaim == null)
         {

@@ -25,7 +25,7 @@ public class UserController : ControllerBase
         _mapper = mapper;
     }
 
-    [CustomAuthorizationFilter(permission: "GetUserById")]
+    [CustomAuthorizationFilter("GetUserById")]
     [HttpGet("[action]")]
     public async Task<IActionResult> GetUserById([FromQuery] int id)
     {
@@ -39,7 +39,7 @@ public class UserController : ControllerBase
 
     [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> GetAllUser()
     {
         IQueryable<User> Users = await _userRepository.GetAsync(x => true);

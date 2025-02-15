@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookApplication.DTOs.AuthorDTO;
 using BookApplication.Repositories;
+using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -56,7 +57,7 @@ public class AuthorController : ControllerBase
 
     [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
-    [Authorize]
+    [CustomAuthorizationFilter("GetAllAuthors")] 
     public async Task<IActionResult> GetAllAuthors()
     {
         /*string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
