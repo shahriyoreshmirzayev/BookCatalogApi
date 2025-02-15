@@ -36,7 +36,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet("[action]")]
-    [Authorize(Roles = "GetByIdAuthor")]
+    [Authorize(Roles = "GetAuthor")]
     public async Task<IActionResult> GetAuthorById([FromQuery] int id)
     {
         if (_memoryCache.TryGetValue(id.ToString(), out AuthorGetDTO CashedAuthor))
