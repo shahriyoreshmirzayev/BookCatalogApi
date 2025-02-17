@@ -5,7 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace BookCatalogApi.Filters;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class CacheResourceFilterAttribute : Attribute, IAsyncResourceFilter
+public class CacheResourceFilterAttribute : Attribute, IResourceFilter
 {
     private readonly IMemoryCache _cache;
     private readonly string _cacheKey;
@@ -16,27 +16,27 @@ public class CacheResourceFilterAttribute : Attribute, IAsyncResourceFilter
         _cacheKey = cacheKey;
     }
 
-    /* public void OnResourceExecuted(ResourceExecutedContext context)
-     {
-         if (_cache.TryGetValue(_cacheKey, out var cashedResult))
-         {
-             context.Result = cashedResult as IActionResult;
-         }
-     }
+    public void OnResourceExecuted(ResourceExecutedContext context)
+    {
+        if (_cache.TryGetValue(_cacheKey, out var cashedResult))
+        {
+            context.Result = cashedResult as IActionResult;
+        }
+    }
 
-     public void OnResourceExecuting(ResourceExecutingContext context)
-     {
-         if(context.Result is IActionFilter result)
-         {
-             var option = new MemoryCacheEntryOptions()
-                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
-                 .SetSlidingExpiration(TimeSpan.FromSeconds(10));
+    public void OnResourceExecuting(ResourceExecutingContext context)
+    {
+        if (context.Result is IActionFilter result)
+        {
+            var option = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
+                .SetSlidingExpiration(TimeSpan.FromSeconds(10));
 
-             _cache.Set(_cacheKey, result, option);
-         }
-     }*/
+            _cache.Set(_cacheKey, result, option);
+        }
+    }
 
-    public Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
+    /*public Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
     {
         if (_cache.TryGetValue(_cacheKey, out var cashedResult))
         {
@@ -53,5 +53,5 @@ public class CacheResourceFilterAttribute : Attribute, IAsyncResourceFilter
             _cache.Set(_cacheKey, result, option);
         }
         return Task.CompletedTask;
-    }
+    }*/
 }
