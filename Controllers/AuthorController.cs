@@ -55,9 +55,10 @@ public class AuthorController : ControllerBase
         return Ok(authorGet);
     }
 
-    [HttpGet("[action]")]
     //[OutputCache(Duration = 30)]
-    [CustomAuthorizationFilter("GetAllAuthors")] 
+    [HttpGet("[action]")]
+    [CacheResourceFilter("AllAuthorsCache")]
+    //[CustomAuthorizationFilter("GetAllAuthors")]
     public async Task<IActionResult> GetAllAuthors()
     {
         /*string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
@@ -138,7 +139,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpPost("[action]")]
-    [Authorize(Roles = "CreateAuthor")]
+    //[Authorize(Roles = "CreateAuthor")]
     public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateDTO createDTO)
     {
         if (ModelState.IsValid)
@@ -165,7 +166,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpPut("[action]")]
-    [Authorize(Roles = "UpdateAuthor")]
+    //[Authorize(Roles = "UpdateAuthor")]
     public async Task<IActionResult> UpdateAuthor([FromBody] AuthorUpdateDTO createDTO)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -187,7 +188,7 @@ public class AuthorController : ControllerBase
     }
 
     [HttpDelete("[action]")]
-    [Authorize(Roles = "DeletAuthor")]
+    //[Authorize(Roles = "DeletAuthor")]
     public async Task<IActionResult> DeleteAuthor([FromQuery] int id)
     {
         bool isDelete = await _authorRepository.DeleteAsync(id);

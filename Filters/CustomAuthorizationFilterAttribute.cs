@@ -31,6 +31,6 @@ public class CustomAuthorizationFilterAttribute : Attribute, IAuthorizationFilte
         {
             context.Result = new ForbidResult();
             return;
-        }
+        } 
     }
 }
