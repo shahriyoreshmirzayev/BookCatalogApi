@@ -1,26 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace BookCatalogApi.Filters
+namespace BookCatalogApi.Filters;
+
+public class ValidationActionFilters : Attribute, IActionFilter
 {
-    public class ValidationActionFilters : Attribute, IActionFilter
+    public void OnActionExecuting(ActionExecutingContext context)
     {
-        public void OnActionExecuting(ActionExecutingContext context)
+        if (!context.ModelState.IsValid)
         {
-            if (!context.ModelState.IsValid)
-            {
-                context.Result = new BadRequestObjectResult(context.ModelState);
-            }
+            context.Result = new BadRequestObjectResult(context.ModelState);
         }
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-
-        }
-
-
-        //public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
+    public void OnActionExecuted(ActionExecutedContext context)
+    {
+
+    }
+    //public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+    //{
+    //    throw new NotImplementedException();
+    //}
 }
