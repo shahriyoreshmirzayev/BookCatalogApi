@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookApplication.DTOs.RoleDTO;
 using BookApplication.Repositories;
+using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ namespace BookCatalogApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
+[ValidationActionFilters]
 public class RoleControllercs : ControllerBase
 {
     private readonly IRoleRepository _roleRepository;
@@ -46,9 +48,6 @@ public class RoleControllercs : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateRole([FromBody] RoleCreateDTO createDTO)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         Role role = _mapper.Map<Role>(createDTO);
         List<Permission> permissions = new(); 
         for (int i = 0; i < role.Permissions.Count; i++)
@@ -74,8 +73,6 @@ public class RoleControllercs : ControllerBase
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateRole([FromBody] RoleUpdateDTO updateDTO)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
         Role role = _mapper.Map<Role>(updateDTO);
        
         role = await _roleRepository.UpdateAsync(role);
