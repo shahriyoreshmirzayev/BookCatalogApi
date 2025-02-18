@@ -12,6 +12,7 @@ namespace BookCatalogApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Authorize]
+[ValidationActionFilters]
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
@@ -49,9 +50,6 @@ public class UserController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateUser([FromBody] UserCreateDTO createDTO)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         User user = _mapper.Map<User>(createDTO);
         List<Role> permissions = new();
 
@@ -68,13 +66,9 @@ public class UserController : ControllerBase
         user.Roles = permissions;
         user = await _userRepository.AddAsync(user);
         if (user == null) return BadRequest(ModelState);
-
-
         UserGetDTO userGet = _mapper.Map<UserGetDTO>(user);
         return Ok(userGet);
     }
-
-
     /*[HttpPost("[action]")]
     public async Task<IActionResult> CreateUser([FromBody] UserCreateDTO createDTO)
     {
@@ -126,20 +120,12 @@ public class UserController : ControllerBase
         return Ok(userGet);
     }*/
 
-
-
-
-
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO updateDTO)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
         User user = _mapper.Map<User>(updateDTO);
-
         user = await _userRepository.UpdateAsync(user);
         if (user == null) return BadRequest(ModelState);
-
         UserGetDTO userGet = _mapper.Map<UserGetDTO>(user);
         return Ok(userGet);
     }
@@ -154,25 +140,21 @@ public class UserController : ControllerBase
     [HttpPut("[action]")]
     public async Task<IActionResult> ChangeUserPassword(UserChangedPasswordDTO userChangedPassword)
     {
-        if (ModelState.IsValid)
-        {
-            var user = await _userRepository.GetByIdAsync(userChangedPassword.UserId);
+        var user = await _userRepository.GetByIdAsync(userChangedPassword.UserId);
 
-            if (user != null)
+        if (user != null)
+        {
+            string CurrentHash = userChangedPassword.CurrentPassword.GetHash();
+            //string DbHash = user.Password;
+            if (CurrentHash == user.Password
+                && userChangedPassword.NewPassword == userChangedPassword.ConfirmNewPassword)
             {
-                string CurrentHash = userChangedPassword.CurrentPassword.GetHash();
-                //string DbHash = user.Password;
-                if (CurrentHash == user.Password
-                    && userChangedPassword.NewPassword == userChangedPassword.ConfirmNewPassword)
-                {
-                    user.Password = userChangedPassword.NewPassword.GetHash();
-                    await _userRepository.UpdateAsync(user);
-                    return Ok();
-                }
-                else return BadRequest("Incorrect password .......");
+                user.Password = userChangedPassword.NewPassword.GetHash();
+                await _userRepository.UpdateAsync(user);
+                return Ok();
             }
-            return BadRequest("User not found .....");
+            else return BadRequest("Incorrect password .......");
         }
-        return BadRequest(ModelState);
+        return BadRequest("User not found .....");
     }
 }
