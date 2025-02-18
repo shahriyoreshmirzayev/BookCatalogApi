@@ -7,6 +7,7 @@ using BookApplication.Repositories;
 using BookCatalogApiDomain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BookCatalogApi.Controllers;
 
@@ -31,7 +32,7 @@ public class AccountController : ControllerBase
         x.Email == userCredentials.Email)).FirstOrDefault();
         if (user != null)
         {
-
+            //bu mening birinchi bot
             RegistiredUserDTO userDTO = new()
             {
                 User = user,
@@ -91,7 +92,7 @@ public class AccountController : ControllerBase
     public async Task<IActionResult> Refresh([FromBody] Token tokens)
     {
         var principal = _tokenService.GetClaimsFromExpiredToken(tokens.AccesToken);
-        string? email = principal.Identity?.Name;
+        string? email = principal.FindFirstValue(ClaimTypes.Email);
         if (email == null)
         {
             return NotFound("Refresh token not found ....");

@@ -15,6 +15,7 @@ namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[ValidationActionFilters]
 public class AuthorController : ControllerBase
 {
     private readonly IBookRepository _bookRepository;
@@ -58,7 +59,7 @@ public class AuthorController : ControllerBase
     //[OutputCache(Duration = 30)]
     [HttpGet("[action]")]
     [CacheResourceFilter("AllAuthorsCache")]
-    //[CustomAuthorizationFilter("GetAllAuthors")]
+    [CustomAuthorizationFilter("GetAllAuthors")]
     public async Task<IActionResult> GetAllAuthors()
     {
         /*string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
@@ -139,11 +140,12 @@ public class AuthorController : ControllerBase
     }
 
     [HttpPost("[action]")]
-    //[Authorize(Roles = "CreateAuthor")]
+    [CustomAuthorizationFilter("CreateAuthor")]
+    //[ValidationActionFilters]
     public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateDTO createDTO)
     {
-        if (ModelState.IsValid)
-        {
+        //if (ModelState.IsValid)
+        //{
             Author author = _mapper.Map<Author>(createDTO);
             var validResult = _validator.Validate(author);
             if (!validResult.IsValid) return BadRequest(validResult);
@@ -161,8 +163,8 @@ public class AuthorController : ControllerBase
             if (author == null) return NotFound();
             AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
             return Ok(authorGet);
-        }
-        return BadRequest(ModelState);
+        //}
+        //return BadRequest(ModelState);
     }
 
     [HttpPut("[action]")]
