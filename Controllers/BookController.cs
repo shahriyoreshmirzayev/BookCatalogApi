@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookApplication.DTOs.BookDTO;
 using BookApplication.Repositories;
+using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using LazyCache;
@@ -12,6 +13,7 @@ namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[ValidationActionFilters]
 public class BookController : ControllerBase
 {
     private readonly IBookRepository _bookRepository;
@@ -89,9 +91,6 @@ public class BookController : ControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateBook([FromBody] BookCreateDTO bookCreate)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
         Book book = _mapper.Map<Book>(bookCreate);
         var validationRes = _validator.Validate(book);
         if (!validationRes.IsValid)
@@ -113,10 +112,6 @@ public class BookController : ControllerBase
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateBook([FromBody] BookUpdateDTO bookCreate)
     {
-        if (ModelState.IsValid)
-            return BadRequest(ModelState);
-
-
         Book book = _mapper.Map<Book>(bookCreate);
         var validationRes = _validator.Validate(book);
         if (!validationRes.IsValid)
@@ -135,7 +130,6 @@ public class BookController : ControllerBase
         book = await _bookRepository.UpdateAsync(book);
         if (book == null) NotFound("Book not found . ....!");
         return Ok(_mapper.Map<BookGetDTO>(book));
-
     }
 
     [HttpDelete("[action]")]
@@ -147,5 +141,4 @@ public class BookController : ControllerBase
         }
         return BadRequest("Delete operation failed .....");
     }
-
 }
