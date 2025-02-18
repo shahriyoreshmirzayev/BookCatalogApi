@@ -4,6 +4,7 @@ using BookApplication.DTOs.UserDTO;
 using BookApplication.Extensions;
 using BookApplication.Models;
 using BookApplication.Repositories;
+using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[ValidationActionFilters]
 public class AccountController : ControllerBase
 {
     private readonly ITokenService _tokenService;
@@ -60,30 +62,25 @@ public class AccountController : ControllerBase
             return Ok(userDTO);
         }
         return BadRequest("Login yoki parol noto‘g‘ri!");
-    }*/ 
-
-
+    }*/
 
     [HttpPost]
     [Route("Register")]
     public async Task<IActionResult> Create([FromBody] UserCreateDTO NewUser)
     {
-        if (ModelState.IsValid)
+        User user = _mapper.Map<User>(NewUser);
+        user.Password = user.Password.GetHash();
+        user = await _userRepository.AddAsync(user);
+        if (user != null)
         {
-            User user = _mapper.Map<User>(NewUser);
-            user.Password = user.Password.GetHash();
-            user = await _userRepository.AddAsync(user);
-            if (user != null)
+            RegistiredUserDTO userDTO = new()
             {
-                RegistiredUserDTO userDTO = new()
-                {
-                    User = user,
-                    UsersTokens = await _tokenService.CreateTokenAsync(user)
-                };
-                return Ok(userDTO);
-            }
+                User = user,
+                UsersTokens = await _tokenService.CreateTokenAsync(user)
+            };
+            return Ok(userDTO);
         }
-        return BadRequest();
+        return BadRequest(ModelState);
     }
 
     [HttpPost]
@@ -101,13 +98,11 @@ public class AccountController : ControllerBase
                                                         x.RefreshTokenValue == tokens.RefreshToken)
                                                         .FirstOrDefault();
 
-
-
         if (savedRefreshToken == null)
         {
             return BadRequest("Refresh token or Acces token inValid ......");
         }
-        if (savedRefreshToken.ExpiredDate < DateTime.UtcNow) 
+        if (savedRefreshToken.ExpiredDate < DateTime.UtcNow)
         {
             _tokenService.Delete(savedRefreshToken);
             return StatusCode(405, "Refresh token already expired");
@@ -115,7 +110,7 @@ public class AccountController : ControllerBase
         Token newTokens = await _tokenService.CreateTokensFromRefresh(principal, savedRefreshToken);
 
         return Ok(newTokens);
-    } 
+    }
 
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllUsers()
@@ -124,17 +119,10 @@ public class AccountController : ControllerBase
         return Ok(res);
     }
 
-
-
     [HttpPut("[action]")]
     public async Task<IActionResult> UpdateUser([FromBody] User user)
     {
-        if (ModelState.IsValid)
-        {
-            user = await _userRepository.UpdateAsync(user);
-            return Ok(user);
-        }
-        return BadRequest();
+        user = await _userRepository.UpdateAsync(user);
+        return Ok(user);
     }
-
 }

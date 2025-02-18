@@ -144,8 +144,7 @@ public class AuthorController : ControllerBase
     //[ValidationActionFilters]
     public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateDTO createDTO)
     {
-        //if (ModelState.IsValid)
-        //{
+       
             Author author = _mapper.Map<Author>(createDTO);
             var validResult = _validator.Validate(author);
             if (!validResult.IsValid) return BadRequest(validResult);
@@ -163,15 +162,13 @@ public class AuthorController : ControllerBase
             if (author == null) return NotFound();
             AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
             return Ok(authorGet);
-        //}
-        //return BadRequest(ModelState);
+        
     }
 
     [HttpPut("[action]")]
     //[Authorize(Roles = "UpdateAuthor")]
     public async Task<IActionResult> UpdateAuthor([FromBody] AuthorUpdateDTO createDTO)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
 
         Author author = _mapper.Map<Author>(createDTO);
         var validationRes = _validator.Validate(author);
