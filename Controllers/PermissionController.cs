@@ -13,7 +13,7 @@ public class PermissionController : ApiControllerBase
     private readonly IPermissionRepository _permissionRepository;
     //private readonly IValidator<Permission> _validator;
 
-    public PermissionController(IPermissionRepository permissionRepository, /*IValidator<Permission> validator,*/)
+    public PermissionController(IPermissionRepository permissionRepository)
     {
         _permissionRepository = permissionRepository;
         //_validator = validator;
