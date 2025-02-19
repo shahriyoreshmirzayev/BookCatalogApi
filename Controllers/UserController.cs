@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using BookApplication.DTOs.UserDTO;
+﻿using BookApplication.DTOs.UserDTO;
 using BookApplication.Extensions;
 using BookApplication.Repositories;
 using BookCatalogApi.Filters;
@@ -10,20 +9,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
 [Authorize]
-[ValidationActionFilters]
-public class UserController : ControllerBase
+public class UserController : ApiControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
-    private readonly IMapper _mapper;
 
-    public UserController(IUserRepository userRepository, IRoleRepository roleRepository, IMapper mapper)
+    public UserController(IUserRepository userRepository, IRoleRepository roleRepository)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
-        _mapper = mapper;
     }
 
     [CustomAuthorizationFilter("GetUserById")]

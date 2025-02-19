@@ -1,27 +1,23 @@
-﻿using AutoMapper;
-using BookApplication.DTOs.PermissionDTO;
+﻿using BookApplication.DTOs.PermissionDTO;
 using BookApplication.Repositories;
-using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
-[ValidationActionFilters]
-public class PermissionController : ControllerBase
+[Authorize]
+public class PermissionController : ApiControllerBase
 {
     private readonly IPermissionRepository _permissionRepository;
     //private readonly IValidator<Permission> _validator;
-    private readonly IMapper _mapper;
 
-    public PermissionController(IPermissionRepository permissionRepository, /*IValidator<Permission> validator,*/ IMapper mapper)
+    public PermissionController(IPermissionRepository permissionRepository, /*IValidator<Permission> validator,*/)
     {
         _permissionRepository = permissionRepository;
         //_validator = validator;
-        _mapper = mapper;
-    }   
+    }
 
     [HttpGet("[action]")]
     public async Task<IActionResult> GetPermissionById([FromQuery] int id)

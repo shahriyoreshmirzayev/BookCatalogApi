@@ -6,7 +6,6 @@ using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
@@ -14,25 +13,21 @@ using System.Text.Json;
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
-[ValidationActionFilters]
-public class AuthorController : ControllerBase
+public class AuthorController : ApiControllerBase
 {
     private readonly IBookRepository _bookRepository;
     private readonly IAuthorRepository _authorRepository;
     private readonly IValidator<Author> _validator;
-    private readonly IMapper _mapper;
     private readonly IMemoryCache _memoryCache; // keshlash uchun
     private readonly IDistributedCache _cache;  // Redis uchun
 
     private readonly string _Cashe_Key = "MyKey";
 
-    public AuthorController(IBookRepository bookRepository, IAuthorRepository authorRepository, IValidator<Author> validator, IMapper mapper, IMemoryCache memoryCache, IDistributedCache cache)
+    public AuthorController(IBookRepository bookRepository, IAuthorRepository authorRepository, IValidator<Author> validator,  IMemoryCache memoryCache, IDistributedCache cache)
     {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
         _validator = validator;
-        _mapper = mapper;
         _memoryCache = memoryCache;
         _cache = cache;
     }
@@ -87,6 +82,7 @@ public class AuthorController : ControllerBase
         var res = JsonSerializer.Deserialize<IEnumerable<AuthorGetDTO>>(CachedAuthors);
         return Ok(res);*/
         // PDP Online kodi
+        throw new NotImplementedException();
         string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
 
         if (string.IsNullOrEmpty(CachedAuthors))
@@ -144,25 +140,25 @@ public class AuthorController : ControllerBase
     //[ValidationActionFilters]
     public async Task<IActionResult> CreateAuthor([FromBody] AuthorCreateDTO createDTO)
     {
-       
-            Author author = _mapper.Map<Author>(createDTO);
-            var validResult = _validator.Validate(author);
-            if (!validResult.IsValid) return BadRequest(validResult);
 
-            //for (int i = 0; i < author.Books.Count; i++)
-            //{
-            //    Book book = author.Books.ToArray()[i];
-            //    book = await _bookRepository.GetByIdAsync(book.Id);
-            //    if (book == null)
-            //    {
-            //        return NotFound("Book Id not found. . ...");
-            //    }
-            //}
-            author = await _authorRepository.AddAsync(author);
-            if (author == null) return NotFound();
-            AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
-            return Ok(authorGet);
-        
+        Author author = _mapper.Map<Author>(createDTO);
+        var validResult = _validator.Validate(author);
+        if (!validResult.IsValid) return BadRequest(validResult);
+
+        //for (int i = 0; i < author.Books.Count; i++)
+        //{
+        //    Book book = author.Books.ToArray()[i];
+        //    book = await _bookRepository.GetByIdAsync(book.Id);
+        //    if (book == null)
+        //    {
+        //        return NotFound("Book Id not found. . ...");
+        //    }
+        //}
+        author = await _authorRepository.AddAsync(author);
+        if (author == null) return NotFound();
+        AuthorGetDTO authorGet = _mapper.Map<AuthorGetDTO>(author);
+        return Ok(authorGet);
+
     }
 
     [HttpPut("[action]")]

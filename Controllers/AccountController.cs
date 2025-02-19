@@ -13,19 +13,15 @@ using System.Security.Claims;
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
-[ValidationActionFilters]
-public class AccountController : ControllerBase
+public class AccountController : ApiControllerBase
 {
     private readonly ITokenService _tokenService;
     private readonly IUserRepository _userRepository;
-    private readonly IMapper _mapper;
 
-    public AccountController(ITokenService tokenService, IUserRepository userRepository, IMapper mapper)
+    public AccountController(ITokenService tokenService, IUserRepository userRepository)
     {
         _tokenService = tokenService;
         _userRepository = userRepository;
-        _mapper = mapper;
     }
     [HttpPost("[action]")]
     public async Task<IActionResult> Login([FromForm] UserCredentials userCredentials)

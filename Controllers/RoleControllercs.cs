@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using BookApplication.DTOs.RoleDTO;
+﻿using BookApplication.DTOs.RoleDTO;
 using BookApplication.Repositories;
-using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,19 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
 [Authorize]
-[ValidationActionFilters]
-public class RoleControllercs : ControllerBase
+public class RoleControllercs : ApiControllerBase
 {
     private readonly IRoleRepository _roleRepository;
     private readonly IPermissionRepository _permissionRepository;
-    private readonly IMapper _mapper;
 
-    public RoleControllercs(IRoleRepository roleRepository, IMapper mapper, IPermissionRepository permissionRepository)
+    public RoleControllercs(IRoleRepository roleRepository, IPermissionRepository permissionRepository)
     {
         _roleRepository = roleRepository;
-        _mapper = mapper;
         _permissionRepository = permissionRepository;
     }
 
@@ -49,7 +43,7 @@ public class RoleControllercs : ControllerBase
     public async Task<IActionResult> CreateRole([FromBody] RoleCreateDTO createDTO)
     {
         Role role = _mapper.Map<Role>(createDTO);
-        List<Permission> permissions = new(); 
+        List<Permission> permissions = new();
         for (int i = 0; i < role.Permissions.Count; i++)
         {
             Permission permission = role.Permissions.ToArray()[i];
@@ -74,10 +68,10 @@ public class RoleControllercs : ControllerBase
     public async Task<IActionResult> UpdateRole([FromBody] RoleUpdateDTO updateDTO)
     {
         Role role = _mapper.Map<Role>(updateDTO);
-       
+
         role = await _roleRepository.UpdateAsync(role);
         if (role == null) return BadRequest(ModelState);
-       
+
         RoleGetDTO roleGet = _mapper.Map<RoleGetDTO>(role);
         return Ok(roleGet);
     }
@@ -86,7 +80,7 @@ public class RoleControllercs : ControllerBase
     public async Task<IActionResult> DeleteRole([FromQuery] int id)
     {
         bool isDelete = await _roleRepository.DeleteAsync(id);
-        return isDelete ? Ok("Deleted succesfuly ....") 
+        return isDelete ? Ok("Deleted succesfuly ....")
             : BadRequest("Delete operation failed");
     }
 }

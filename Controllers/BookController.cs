@@ -12,21 +12,17 @@ using Microsoft.Extensions.Caching.Memory;
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
-[ApiController]
-[ValidationActionFilters]
-public class BookController : ControllerBase
+public class BookController : ApiControllerBase
 {
     private readonly IBookRepository _bookRepository;
     private readonly IAuthorRepository _authorRepository;
     private readonly IValidator<Book> _validator;
-    private readonly IMapper _mapper;
     private readonly IAppCache _lazyCache;
     private const string _Key = "MyLazyCache";
-    public BookController(IBookRepository bookRepository, IValidator<Book> bookValidator, IMapper mapper, IAuthorRepository authorRepository, IAppCache lazyCache)
+    public BookController(IBookRepository bookRepository, IValidator<Book> bookValidator, IAuthorRepository authorRepository, IAppCache lazyCache)
     {
         _bookRepository = bookRepository;
         _validator = bookValidator;
-        _mapper = mapper;
         _authorRepository = authorRepository;
         _lazyCache = lazyCache;
     }
