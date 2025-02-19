@@ -54,7 +54,7 @@ public class AuthorController : ApiControllerBase
     //[OutputCache(Duration = 30)]
     [HttpGet("[action]")]
     [CacheResourceFilter("AllAuthorsCache")]
-    [CustomAuthorizationFilter("GetAllAuthors")]
+    //[CustomAuthorizationFilter("GetAllAuthors")]
     public async Task<IActionResult> GetAllAuthors()
     {
         /*string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
@@ -82,7 +82,7 @@ public class AuthorController : ApiControllerBase
         var res = JsonSerializer.Deserialize<IEnumerable<AuthorGetDTO>>(CachedAuthors);
         return Ok(res);*/
         // PDP Online kodi
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
         string? CachedAuthors = await _cache.GetStringAsync(_Cashe_Key);
 
         if (string.IsNullOrEmpty(CachedAuthors))

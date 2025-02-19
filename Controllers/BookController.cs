@@ -29,7 +29,7 @@ public class BookController : ApiControllerBase
 
     [HttpGet("[action]")]
     //[ResponseCache(Duration = 20)]
-    [Authorize(Roles = "GetAllBooks")]
+    //[CustomAuthorizationFilter("GetAllBooks")]
     public async Task<IActionResult> GetAllBooks()
     {
         /*bool IsActive = _lazyCache.TryGetValue(_Key, out IEnumerable<BookGetDTO> CacheBooks);
@@ -76,7 +76,7 @@ public class BookController : ApiControllerBase
     }
 
     [HttpGet("[action]/{id}")]
-    [Authorize(Roles = "GetBookId")]
+    [CustomAuthorizationFilter("GetBook")]
     public async Task<IActionResult> GetBookById(int id)
     {
         Book book = await _bookRepository.GetByIdAsync(id);
@@ -128,7 +128,6 @@ public class BookController : ApiControllerBase
         return Ok(_mapper.Map<BookGetDTO>(book));
     }
 
-    [HttpDelete("[action]")]
     public async Task<IActionResult> DeleteBook([FromQuery] int bookId)
     {
         if (_bookRepository.DeleteAsync(bookId) != null)
@@ -136,5 +135,11 @@ public class BookController : ApiControllerBase
             return Ok("Deleted Succesfuly .....!");
         }
         return BadRequest("Delete operation failed .....");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SearchBook(string text)
+    {
+        return Ok(_bookRepository.SearchBokks(text));
     }
 }
