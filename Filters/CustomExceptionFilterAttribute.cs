@@ -1,17 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace BookCatalogApi.Filters
+namespace BookCatalogApi.Filters;
+
+public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
 {
-    public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
+    public override void OnException(ExceptionContext context)
     {
-        public override void OnException(ExceptionContext context)
+        var result = new ObjectResult("An error occurred")
         {
-            var result = new ObjectResult("An error occurred")
-            {
-                StatusCode = StatusCodes.Status500InternalServerError
-            };
-            context.Result = result;
-        }
+            StatusCode = StatusCodes.Status500InternalServerError
+        };
+        context.Result = result;
     }
 }
