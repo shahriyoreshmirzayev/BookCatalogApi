@@ -5,6 +5,7 @@ using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,6 +14,7 @@ using System.Text.Json;
 namespace BookCatalogApi.Controllers;
 
 [Route("api/[controller]")]
+[EnableCors("PolicyForPDP")]
 public class AuthorController : ApiControllerBase
 {
     private readonly IBookRepository _bookRepository;
@@ -191,5 +193,10 @@ public class AuthorController : ApiControllerBase
         _memoryCache.Remove(_Cashe_Key);
         return isDelete ? Ok("Deleted succesfuly ....") : BadRequest("Delete operation failed");
     }
-
+    [HttpPost("[action]")]
+    [EnableCors]
+    public async Task<IActionResult> post()
+    {
+        return Ok();
+    }
 }
