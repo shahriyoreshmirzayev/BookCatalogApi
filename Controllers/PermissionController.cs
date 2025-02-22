@@ -1,6 +1,9 @@
 ﻿using BookApplication.DTOs.PermissionDTO;
 using BookApplication.Repositories;
+using BookApplication.UseCases.Permission;
+using BookApplication.UseCases.Permission.Commands;
 using BookCatalogApiDomain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,23 +14,23 @@ namespace BookCatalogApi.Controllers;
 public class PermissionController : ApiControllerBase
 {
     private readonly IPermissionRepository _permissionRepository;
-    //private readonly IValidator<Permission> _validator;
-
-    public PermissionController(IPermissionRepository permissionRepository)
+    private readonly IMediator _mediator;
+    public PermissionController(IPermissionRepository permissionRepository, IMediator mediator = null)
     {
         _permissionRepository = permissionRepository;
-        //_validator = validator;
+        _mediator = mediator;
     }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetPermissionById([FromQuery] int id)
+    public async Task<IActionResult> GetPermissionById([FromQuery] GetPermissionByIdQuery query)
     {
-        Permission permission = await _permissionRepository.GetByIdAsync(id);
-        if (permission == null)
-        {
-            return NotFound($"Permission Id {id} not found. .....!");
-        }
-        return Ok(permission);
+        return await _mediator.Send(query);
+        //Permission permission = await _permissionRepository.GetByIdAsync(id);
+        //if (permission == null)
+        //{
+        //    return NotFound($"Permission Id {id} not found. .....!");
+        //}
+        //return Ok(permission);
     }
 
     [HttpGet("[action]")]
@@ -38,12 +41,9 @@ public class PermissionController : ApiControllerBase
     }
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> CreatePermission([FromBody] PermissionCreateDTO permissionCreateDTO)
+    public async Task<IActionResult> CreatePermission([FromBody] CreatePermissionCommand permissionCreateDTO)
     {
-        Permission permission = _mapper.Map<Permission>(permissionCreateDTO);
-        permission = await _permissionRepository.AddAsync(permission);
-        if (permission == null) return BadRequest(ModelState);
-        return Ok(permission);
+        return await _mediator.Send(permissionCreateDTO);
     }
 
     [HttpPut("[action]")]
