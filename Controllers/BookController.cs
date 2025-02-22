@@ -1,11 +1,11 @@
-﻿using AutoMapper;
-using BookApplication.DTOs.BookDTO;
+﻿using BookApplication.DTOs.BookDTO;
 using BookApplication.Repositories;
+using BookApplication.UseCases.Notifications;
 using BookCatalogApi.Filters;
 using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using LazyCache;
-using Microsoft.AspNetCore.Authorization;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -19,12 +19,14 @@ public class BookController : ApiControllerBase
     private readonly IValidator<Book> _validator;
     private readonly IAppCache _lazyCache;
     private const string _Key = "MyLazyCache";
-    public BookController(IBookRepository bookRepository, IValidator<Book> bookValidator, IAuthorRepository authorRepository, IAppCache lazyCache)
+    private readonly IMediator _mediator;
+    public BookController(IBookRepository bookRepository, IValidator<Book> bookValidator, IAuthorRepository authorRepository, IAppCache lazyCache, IMediator mediator)
     {
         _bookRepository = bookRepository;
         _validator = bookValidator;
         _authorRepository = authorRepository;
         _lazyCache = lazyCache;
+        _mediator = mediator;
     }
 
     [HttpGet("[action]")]
@@ -87,6 +89,14 @@ public class BookController : ApiControllerBase
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateBook([FromBody] BookCreateDTO bookCreate)
     {
+        BookAddedNotification bookAddedNotification = new()
+        {
+            book = new Book()
+            {
+                Name = "Test"
+            }
+        };
+        await _mediator.Publish(bookAddedNotification);
         Book book = _mapper.Map<Book>(bookCreate);
         var validationRes = _validator.Validate(book);
         if (!validationRes.IsValid)
