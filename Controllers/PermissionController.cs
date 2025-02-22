@@ -1,7 +1,7 @@
 ﻿using BookApplication.DTOs.PermissionDTO;
 using BookApplication.Repositories;
-using BookApplication.UseCases.Permission;
 using BookApplication.UseCases.Permission.Commands;
+using BookApplication.UseCases.Permission.Query;
 using BookCatalogApiDomain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -25,19 +25,12 @@ public class PermissionController : ApiControllerBase
     public async Task<IActionResult> GetPermissionById([FromQuery] GetPermissionByIdQuery query)
     {
         return await _mediator.Send(query);
-        //Permission permission = await _permissionRepository.GetByIdAsync(id);
-        //if (permission == null)
-        //{
-        //    return NotFound($"Permission Id {id} not found. .....!");
-        //}
-        //return Ok(permission);
     }
 
     [HttpGet("[action]")]
     public async Task<IActionResult> GetAllPermissions()
     {
-        IQueryable<Permission> Permissions = await _permissionRepository.GetAsync(x => true);
-        return Ok(Permissions);
+        return await _mediator.Send(new GetAllPermissionQuery());
     }
 
     [HttpPost("[action]")]
@@ -47,12 +40,9 @@ public class PermissionController : ApiControllerBase
     }
 
     [HttpPut("[action]")]
-    public async Task<IActionResult> UpdatePermission([FromBody] Permission PermissionUpdateDTO)
+    public async Task<IActionResult> UpdatePermission([FromBody] UpdatePermissionCommand PermissionUpdateDTO)
     {
-        Permission permission = _mapper.Map<Permission>(PermissionUpdateDTO);
-        permission = await _permissionRepository.UpdateAsync(PermissionUpdateDTO);
-        if (PermissionUpdateDTO == null) return NotFound();
-        return Ok(permission);
+        return await _mediator.Send(PermissionUpdateDTO);
     }
 
     [HttpDelete("[action]")]
