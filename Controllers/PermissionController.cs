@@ -13,11 +13,9 @@ namespace BookCatalogApi.Controllers;
 [Authorize]
 public class PermissionController : ApiControllerBase
 {
-    private readonly IPermissionRepository _permissionRepository;
     private readonly IMediator _mediator;
-    public PermissionController(IPermissionRepository permissionRepository, IMediator mediator = null)
+    public PermissionController(IMediator mediator)
     {
-        _permissionRepository = permissionRepository;
         _mediator = mediator;
     }
 
@@ -46,9 +44,8 @@ public class PermissionController : ApiControllerBase
     }
 
     [HttpDelete("[action]")]
-    public async Task<IActionResult> DeletePermission([FromQuery] int id)
+    public async Task<IActionResult> DeletePermission([FromQuery] DeletePermissionCommand command)
     {
-        bool isDelete = await _permissionRepository.DeleteAsync(id);
-        return isDelete ? Ok("Deleted succesfuly ....") : BadRequest("Delete operation failed");
+        return await _mediator.Send(command);
     }
 }
