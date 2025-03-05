@@ -6,6 +6,7 @@ using BookCatalogApiDomain.Entities;
 using FluentValidation;
 using LazyCache;
 using MediatR;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -29,30 +30,10 @@ public class BookController : ApiControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("[action]")]
-    //[ResponseCache(Duration = 20)]
-    //[CustomAuthorizationFilter("GetAllBooks")]
+    //[HttpGet("[action]")]
+    [EnableCors("PolicyForMicrosoft")]
     public async Task<IActionResult> GetAllBooks()
     {
-        /*bool IsActive = _lazyCache.TryGetValue(_Key, out IEnumerable<BookGetDTO> CacheBooks);
-        if (!IsActive)
-        {
-            var books = await _bookRepository.GetAsync(x => true);
-
-            IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
-
-            var entryOptions = new MemoryCacheEntryOptions()
-                               .SetAbsoluteExpiration(TimeSpan.FromSeconds(30))
-                               .SetSlidingExpiration(TimeSpan.FromSeconds(10));
-
-            _lazyCache.Add(_Key, booksRes, entryOptions);
-            Console.WriteLine("_lazycache hit.....");
-            return Ok(booksRes);
-
-        }
-        return Ok(CacheBooks);*/
-
-
         IEnumerable<BookGetDTO> res = await _lazyCache.GetOrAdd(_Key,
             async options =>
             {
@@ -64,17 +45,7 @@ public class BookController : ApiControllerBase
                 IEnumerable<BookGetDTO> bookRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);
                 return bookRes;
             });
-
         return Ok(res);
-
-
-        /*var books = (await _bookRepository.GetAsync(x => true));
-        if (books == null)
-        {
-            return Ok();
-        }
-        IEnumerable<BookGetDTO> booksRes = _mapper.Map<IEnumerable<BookGetDTO>>(books);*/
-        //return Ok(booksRes);
     }
 
     [HttpGet("[action]/{id}")]
