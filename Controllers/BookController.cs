@@ -12,10 +12,11 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BookCatalogApi.Controllers;
 
+[ApiController]
 [Route("api/[controller]")]
 public class BookController : ApiControllerBase
 {
-    private readonly IBookRepository _bookRepository;
+    private readonly IBookRepository _bookRepository;   
     private readonly IAuthorRepository _authorRepository;
     private readonly IValidator<Book> _validator;
     private readonly IAppCache _lazyCache;
@@ -30,7 +31,7 @@ public class BookController : ApiControllerBase
         _mediator = mediator;
     }
 
-    //[HttpGet("[action]")]
+    [HttpGet("[action]")]
     [EnableCors("PolicyForMicrosoft")]
     public async Task<IActionResult> GetAllBooks()
     {
