@@ -1,6 +1,5 @@
 using BookApplication;
 using BookInfrastructure;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.OpenApi.Models;
 
 
@@ -55,7 +54,7 @@ namespace BookCatalogApi
                 opt.AddPolicy("PolicyForPDP",
                 policy =>
                 {
-                    policy.WithOrigins("https://online.pdp.uz")
+                    policy.WithOrigins("")
                     .WithHeaders("TestHeader")
                     .WithMethods("GET", "Put");
                 });
@@ -63,14 +62,14 @@ namespace BookCatalogApi
                 opt.AddPolicy("PolicyForMicrosoft",
                 policy =>
                 {
-                    policy.WithOrigins("https://www.microsoft.com")
+                    policy.WithOrigins("")
                     .WithHeaders("Net-Header")
                     .WithMethods("GET", "Post");
                 });
 
                 opt.AddDefaultPolicy(policyOpt =>
                 {
-                    policyOpt.WithOrigins("https://www.google.com");
+                    policyOpt.WithOrigins("");
 
                 });
             });
@@ -81,33 +80,7 @@ namespace BookCatalogApi
 
             builder.Services.AddControllers();
 
-            //builder.Services.AddRateLimiter(opt =>
-            //{
-            //    opt.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            //    opt.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-            //        RateLimitPartition.GetConcurrencyLimiter(
-            //             partitionKey: "ConcurrencyLimiter",
-            //             factory: x => new ConcurrencyLimiterOptions
-            //             {
-            //                 PermitLimit = 4,
-            //                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-            //                 QueueLimit = 2,
-            //             }));
-            //});
 
-            ////AddFixedWindowLimiter
-            //builder.Services.AddRateLimiter(options =>
-            //{
-            //    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            //    options.AddFixedWindowLimiter("FixedWindow", x =>
-            //    {
-            //        x.PermitLimit = 3;
-            //        x.QueueLimit = 0;
-            //        x.Window = TimeSpan.FromSeconds(20);
-            //        x.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
-            //        // x.AutoReplenishment = true;
-            //    });
-            //});
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -155,18 +128,7 @@ namespace BookCatalogApi
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             });
-            app.UseCors("PolicyForPDP");
-            app.UseCors("PolicyForMicrosoft");
-            //app.UseCors(opt =>
-            //{
-            //    opt.AllowAnyMethod()
-            //    .AllowAnyOrigin()
-            //    .AllowAnyHeader();
-            //    //.WithOrigins("https://online.pdp.uz")
-            //    //.WithHeaders("my-header", "Test-Header","Other-Header")
-            //    //.WithMethods("GET")
-            //    //.AllowCredentials();
-            //});
+
             app.UseResponseCaching();
 
             app.UseOutputCache();

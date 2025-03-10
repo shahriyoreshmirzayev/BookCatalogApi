@@ -109,7 +109,7 @@ public class BookController : ApiControllerBase
         if (book == null) NotFound("Book not found . ....!");
         return Ok(_mapper.Map<BookGetDTO>(book));
     }
-
+    [HttpDelete]
     public async Task<IActionResult> DeleteBook([FromQuery] int bookId)
     {
         if (_bookRepository.DeleteAsync(bookId) != null)
