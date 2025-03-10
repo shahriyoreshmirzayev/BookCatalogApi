@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookApplication", "..\BookA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookInfrastructure", "..\BookInfrastructure\BookInfrastructure.csproj", "{6FD62CDA-C1DB-4E04-98A3-7E247E09565C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookCatalogMVC", "..\BookCatalogMVC\BookCatalogMVC.csproj", "{0DCFA550-1D8D-4F2C-98E4-A085D495DCC2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,12 +33,11 @@ Global
 		{6FD62CDA-C1DB-4E04-98A3-7E247E09565C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FD62CDA-C1DB-4E04-98A3-7E247E09565C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FD62CDA-C1DB-4E04-98A3-7E247E09565C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0DCFA550-1D8D-4F2C-98E4-A085D495DCC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0DCFA550-1D8D-4F2C-98E4-A085D495DCC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0DCFA550-1D8D-4F2C-98E4-A085D495DCC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0DCFA550-1D8D-4F2C-98E4-A085D495DCC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7736C601-5703-403D-AD80-681099BB5076}
 	EndGlobalSection
 EndGlobal
