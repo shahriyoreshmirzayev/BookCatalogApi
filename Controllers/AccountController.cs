@@ -24,7 +24,7 @@ public class AccountController : ApiControllerBase
         _userRepository = userRepository;
     }
     [HttpPost("[action]")]
-    public async Task<IActionResult> Login([FromForm] UserCredentials userCredentials)
+    public async Task<IActionResult> Login([FromBody] UserCredentials userCredentials)
     {
         var user = (await _userRepository.GetAsync(x => x.Password == userCredentials.Password.GetHash() &&
         x.Email == userCredentials.Email)).FirstOrDefault();
