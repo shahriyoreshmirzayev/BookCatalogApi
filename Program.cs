@@ -96,7 +96,7 @@ namespace BookCatalogApi
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
             app.Use((context, next) =>
             {
